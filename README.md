@@ -1,6 +1,6 @@
 <div align="center">
   <img src="./public/logo.png" width="120" height="120" alt="AetherFlow Logo" style="border-radius: 20px; box-shadow: 0 10px 20px rgba(211, 158, 71, 0.2);" />
-  <h1 align="center">AetherFlow | 艾歐澤亞助手</h1>
+  <h1 align="center">艾歐澤亞助手</h1>
   <p align="center">
     <strong>專為《Final Fantasy XIV》光之戰士設計的一站式實用工具聚合站</strong>
   </p>
@@ -15,7 +15,7 @@
 ---
 
 ## 🌟 專案簡介
-**AetherFlow (Eorzea Utility Hub)** 是一個針對《Final Fantasy XIV》繁體中文服玩家開發的工具聚合站。本專案旨在解決玩家在遊戲過程中需要頻繁切換網頁查詢資訊的痛點，將日常任務追蹤、天氣預報、市場查詢等功能整合於一個流暢、具現代感且符合遊戲美學的介面中。
+**Eorzea Utility Hub** 是一個針對《Final Fantasy XIV》繁體中文服玩家開發的工具聚合站。本專案旨在解決玩家在遊戲過程中需要頻繁切換網頁查詢資訊的痛點，將日常任務追蹤、天氣預報、市場查詢等功能整合於一個流暢、具現代感且符合遊戲美學的介面中。
 
 ## 🛠️ 核心功能
 本站目前提供四大類別、超過 10 種實用工具：
