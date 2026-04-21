@@ -63,14 +63,7 @@
     npm install
     ```
 
-3.  **環境變數設定**：
-    建立 `.env.local` 檔案並填入 API 金鑰：
-
-    ```env
-    VITE_GEMINI_API_KEY=你的_GEMINI_API_KEY
-    ```
-
-4.  **啟動開發伺服器**：
+3.  **啟動開發伺服器**：
 
     ```bash
     npm run dev
