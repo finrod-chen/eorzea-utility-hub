@@ -46,9 +46,8 @@ import EventCalendar, { CalendarEvent } from './components/EventCalendar';
 import SetAlarm from './components/SetAlarm';
 import InteractiveMaps from './components/InteractiveMaps';
 
-import { Alarm, EorzeaTime } from './types';
-
-type View = 'home' | 'cactpot' | 'tails' | 'weather' | 'sightseeing' | 'changelog' | 'chocobo' | 'checklist' | 'guide' | 'market' | 'links' | 'treasure' | 'alarm' | 'event-calendar' | 'interactive-maps';
+import { Alarm, EorzeaTime, View } from './types';
+import { NAV_GROUPS } from './constants/tools';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<View>('home');
@@ -61,8 +60,15 @@ export default function App() {
     const saved = localStorage.getItem('ff14-alarms');
     if (saved) {
       try {
-        return JSON.parse(saved).map((a: any) => ({ ...a, targetTime: new Date(a.targetTime) }));
-      } catch (e) { return []; }
+        return JSON.parse(saved).map((a: { id: string; label: string; targetTime: string; active: boolean; isReset?: boolean }) => ({
+          ...a,
+          targetTime: new Date(a.targetTime),
+          isReset: a.isReset ?? false,
+        }));
+      } catch (e) {
+        console.warn('[App] Failed to parse saved alarms, starting fresh:', e);
+        return [];
+      }
     }
     return [];
   });
@@ -79,53 +85,51 @@ export default function App() {
   const [now, setNow] = useState(new Date());
   const [et, setEt] = useState<EorzeaTime>(getEorzeaTime());
   const [localTime, setLocalTime] = useState(new Date());
-
+  // ── Clock tick (single source of truth) ──────────────────────────────────
   useEffect(() => {
-    const timer = setInterval(() => {
-      const currentTime = new Date();
-      setNow(currentTime);
-      setEt(getEorzeaTime());
-      setLocalTime(currentTime);
-    }, 1000);
+    const tick = () => setNow(new Date());
+    tick();
+    const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
   }, []);
 
+  // ── Derive ET and localTime from now ──────────────────────────────────────
+  useEffect(() => { setEt(getEorzeaTime(now)); }, [now]);
+  useEffect(() => { setLocalTime(now); }, [now]);
+
+  // ── Alarm trigger ──────────────────────────────────────────────────────────
   useEffect(() => {
     let changed = false;
     const nextAlarms = alarms.map(alarm => {
-      if (alarm.active && now >= alarm.targetTime) {
-        // Trigger notification
-        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-          new Notification('艾歐澤亞助手 - 鬧鐘提醒', {
-            body: `${alarm.label} 時間到了！`,
-            icon: '/logo.png',
-            tag: alarm.id
-          });
-        }
+      if (!alarm.active || now < alarm.targetTime) return alarm;
 
-        // Trigger in-app toast
-        toast.success(`${alarm.label} 時間到了！`, {
-          description: `設定時間：${alarm.targetTime.toLocaleTimeString()}`,
-          duration: 10000,
-          icon: <Bell className="text-amber-500" size={18} />
+      if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+        new Notification('艾歐澤亞助手 - 鬧鐘提醒', {
+          body: `${alarm.label} 時間到了！`,
+          icon: '/logo.png',
+          tag: alarm.id,
         });
-
-        // Play sound
-        try {
-          const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-          audio.volume = 0.5;
-          audio.play().catch(e => console.log('Audio play blocked:', e));
-        } catch (e) {}
-
-        changed = true;
-        return { ...alarm, active: false };
       }
-      return alarm;
+
+      toast.success(`${alarm.label} 時間到了！`, {
+        description: `設定時間：${alarm.targetTime.toLocaleTimeString()}`,
+        duration: 10000,
+        icon: <Bell className="text-amber-500" size={18} />,
+      });
+
+      try {
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        audio.volume = 0.5;
+        audio.play().catch(e => console.log('[App] Audio play blocked:', e));
+      } catch (e) {
+        console.warn('[App] Audio playback failed:', e);
+      }
+
+      changed = true;
+      return { ...alarm, active: false };
     });
 
-    if (changed) {
-      setAlarms(nextAlarms);
-    }
+    if (changed) setAlarms(nextAlarms);
   }, [now, alarms]);
 
   useEffect(() => {
@@ -140,7 +144,7 @@ export default function App() {
     visible: (i: number) => ({
       opacity: 1,
       x: 0,
-      transition: { delay: i * 0.05, duration: 0.2, ease: [0.22, 1, 0.36, 1] }
+      transition: { delay: i * 0.05, duration: 0.2, ease: [0.22, 1, 0.36, 1] as const }
     }),
   };
   const navContainerVariants = {

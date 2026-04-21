@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { CheckSquare, Calendar, Clock, RotateCcw, Info, Star, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { INITIAL_TASKS, Task } from '../constants/tasks';
+import { INITIAL_TASKS } from '../constants/tasks';
+import { formatTimestamp } from '../utils/taskUtils';
 
 export default function DutyChecklist() {
   const [completed, setCompleted] = useState<Record<string, string | null>>({});
@@ -14,7 +15,7 @@ export default function DutyChecklist() {
       try {
         setCompleted(JSON.parse(saved));
       } catch (e) {
-        console.error('Failed to load checklist', e);
+        console.warn('[DutyChecklist] Failed to load checklist v2, starting fresh:', e);
       }
     } else {
       // Migration from v1 if exists
@@ -27,7 +28,9 @@ export default function DutyChecklist() {
             if (oldData[key]) newData[key] = new Date().toISOString();
           });
           setCompleted(newData);
-        } catch (e) {}
+        } catch (e) {
+          console.warn('[DutyChecklist] Migration from v1 failed, starting fresh:', e);
+        }
       }
     }
     setIsLoaded(true);
@@ -53,19 +56,6 @@ export default function DutyChecklist() {
       delete newCompleted[t.id];
     });
     setCompleted(newCompleted);
-  };
-
-  const formatTimestamp = (isoString: string | null) => {
-    if (!isoString) return '';
-    const date = new Date(isoString);
-    return date.toLocaleString([], { 
-      month: '2-digit', 
-      day: '2-digit', 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      second: '2-digit',
-      hour12: false 
-    });
   };
 
   const getProgress = (category: 'daily' | 'weekly') => {

@@ -12,3 +12,8 @@ export interface EorzeaTime {
   hours: number;
   minutes: number;
 }
+
+export type View =
+  | 'home' | 'cactpot' | 'tails' | 'weather' | 'sightseeing'
+  | 'changelog' | 'chocobo' | 'checklist' | 'guide' | 'market'
+  | 'links' | 'treasure' | 'alarm' | 'event-calendar' | 'interactive-maps';
