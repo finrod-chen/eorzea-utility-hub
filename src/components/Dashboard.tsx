@@ -279,14 +279,14 @@ export default function Dashboard({ et, onViewChange, events }: DashboardProps) 
           className="block group relative overflow-hidden rounded-3xl border border-white/5 hover:border-[#D39E47]/30 transition-all"
         >
           <img 
-            src="/patch/7-0.jpg" 
+            src="/patch/7-1.jpg" 
             alt="繁中服目前版本" 
             className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
             referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
             <span className="text-white text-sm font-medium flex items-center gap-2">
-              查看官方最新版本消息 <ArrowRight size={16} />
+              2026/04/21 正式更新Patch 7.1！ <ArrowRight size={16} />
             </span>
           </div>
         </a>
