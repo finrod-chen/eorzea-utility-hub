@@ -270,7 +270,7 @@ export default function Dashboard({ et, onViewChange, events }: DashboardProps) 
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <div className="h-1 w-8 bg-[#D39E47] rounded-full" />
-          <h3 className="text-sm font-bold uppercase tracking-widest text-[#D39E47]">繁中服目前版本：Patch 7.05</h3>
+          <h3 className="text-sm font-bold uppercase tracking-widest text-[#D39E47]">繁中服目前版本：Patch 7.1</h3>
         </div>
         <a 
           href="https://www.ffxiv.com.tw/web/news/news_list.aspx?category=2" 
