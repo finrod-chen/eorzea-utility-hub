@@ -9,13 +9,14 @@ const ET_MINUTES_PER_REAL_MINUTE = 1440 / 70; // ≈ 20.5714
 const REAL_SECONDS_PER_ET_MINUTE  = 175 / 60;  // ≈ 2.9167
 
 export function getEorzeaTime(date: Date = new Date()): { hours: number; minutes: number; totalHours: number } {
-  const unixSeconds = date.getTime() / 1000;
-  const etSeconds   = Math.floor(unixSeconds * ET_MINUTES_PER_REAL_MINUTE);
+  const unixSeconds  = date.getTime() / 1000;
+  const etSeconds    = unixSeconds * ET_MINUTES_PER_REAL_MINUTE;
   const totalMinutes = Math.floor(etSeconds / 60);
+  const totalHours    = Math.floor(totalMinutes / 60);
   return {
-    hours:      totalMinutes % 60,
-    totalHours: Math.floor(totalMinutes / 60),
-    minutes:    totalMinutes % 60,
+    hours:      totalHours % 24,  // ET hour within the current day (0–23)
+    minutes:    totalMinutes % 60, // ET minute within the current hour (0–59)
+    totalHours,
   };
 }
 
