@@ -1,11 +1,78 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, useMotionValue, useTransform } from 'motion/react';
 import { Grid3X3, BookOpen, CloudSun, Clock, ArrowRight, Bird, CheckSquare, ShoppingCart, Settings, Map as MapIcon, Bell, Calendar, ExternalLink } from 'lucide-react';
 import { CalendarEvent } from './EventCalendar';
 import ResetCountdown from './ResetCountdown';
 import { INITIAL_TASKS } from '../constants/tasks';
 
 import { fetchOfficialEvents, OfficialEvent } from '../services/eventService';
+
+// ── 3D Tilt Card ────────────────────────────────────────────────────────────
+interface TiltCardProps {
+  tool: {
+    id: string;
+    label: string;
+    icon: React.ComponentType<{ size: number; className?: string }>;
+    image?: string;
+    desc: string;
+    color: string;
+  };
+  onClick: () => void;
+}
+
+function TiltCard({ tool, onClick }: TiltCardProps) {
+  const cardRef = useRef<HTMLButtonElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const rotateX = useTransform(y, [-0.5, 0.5], [8, -8]);
+  const rotateY = useTransform(x, [-0.5, 0.5], [-8, 8]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = cardRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    x.set((e.clientX - rect.left) / rect.width - 0.5);
+    y.set((e.clientY - rect.top) / rect.height - 0.5);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.button
+      ref={cardRef}
+      onClick={onClick}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 text-left group"
+    >
+      <div
+        className="flex justify-between items-start mb-4"
+        style={{ transform: 'translateZ(24px)' }}
+      >
+        <div
+          className={`w-12 h-12 ${tool.color} rounded-xl flex items-center justify-center shadow-lg overflow-hidden p-2`}
+          style={{ transform: 'translateZ(16px)' }}
+        >
+          {tool.image ? (
+            <img src={tool.image} alt="" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+          ) : (
+            <tool.icon size={24} className="text-white" />
+          )}
+        </div>
+      </div>
+      <div style={{ transform: 'translateZ(12px)' }}>
+        <h4 className="font-bold text-white mb-2">{tool.label}</h4>
+        <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">{tool.desc}</p>
+      </div>
+    </motion.button>
+  );
+}
 
 interface DashboardProps {
   et: { hours: number; minutes: number };
@@ -111,20 +178,20 @@ export default function Dashboard({ et, onViewChange, events }: DashboardProps) 
     <div className="space-y-10">
       <header className="space-y-4">
         <div className="flex items-center gap-3">
-          <div className="h-1 w-12 bg-[#D39E47] rounded-full" />
-          <h2 className="text-sm font-bold uppercase tracking-[0.3em] text-[#D39E47]">Dashboard</h2>
+          <div className="h-px w-10 bg-[var(--color-accent)]" />
+          <span className="section-label">Dashboard</span>
         </div>
-        <h1 className="text-4xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
-          歡迎來到 <span className="text-[#D39E47]">艾歐澤亞</span><br />
+        <h1 className="display-heading text-4xl lg:text-6xl text-white">
+          歡迎來到&nbsp;<span className="text-[var(--color-accent)]">艾歐澤亞</span><br />
           冒險者的生活助手
         </h1>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* ET Card */}
-        <div className="bg-[#1a1a1a] border border-white/5 rounded-3xl p-8 flex flex-col justify-between group hover:border-[#D39E47]/30 transition-colors">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)]/30 transition-colors rounded-3xl p-8 flex flex-col justify-between group">
           <div className="space-y-2">
-            <p className="text-xs font-bold text-[#9e9e9e] uppercase tracking-widest">Current Eorzea Time</p>
+            <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Current Eorzea Time</p>
             <div className="text-7xl font-mono font-medium text-white tracking-tighter">
               {String(et.hours).padStart(2, '0')}:{String(et.minutes).padStart(2, '0')}
             </div>
@@ -132,31 +199,31 @@ export default function Dashboard({ et, onViewChange, events }: DashboardProps) 
           <div className="mt-8 flex items-center gap-4">
             <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
               <motion.div 
-                className="h-full bg-[#D39E47]"
+                className="h-full bg-[var(--color-accent)]"
                 initial={{ width: 0 }}
                 animate={{ width: `${((et.hours * 60 + et.minutes) / 1440) * 100}%` }}
               />
             </div>
-            <span className="text-xs font-mono text-[#9e9e9e]">
+            <span className="text-xs font-mono text-[var(--color-text-muted)]">
               {Math.floor(((et.hours * 60 + et.minutes) / 1440) * 100)}% Day
             </span>
           </div>
         </div>
 
         {/* Weather Preview */}
-        <div className="bg-[#1a1a1a] border border-white/5 rounded-3xl p-8 flex flex-col justify-between hover:border-[#00B0FF]/30 transition-colors">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl p-8 flex flex-col justify-between hover:border-[var(--color-accent)]/30 transition-colors">
           <div className="flex justify-between items-start">
             <div className="space-y-1">
-              <p className="text-xs font-bold text-[#9e9e9e] uppercase tracking-widest">Next Weather Change</p>
+              <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Next Weather Change</p>
               <h3 className="text-2xl font-bold text-white">下一段天氣變換</h3>
             </div>
-            <div className="p-3 bg-[#00B0FF]/10 rounded-2xl">
-              <CloudSun className="text-[#00B0FF]" size={24} />
+            <div className="p-3 bg-[var(--color-accent)]/10 rounded-2xl">
+              <CloudSun className="text-[var(--color-accent)]" size={24} />
             </div>
           </div>
           <div className="mt-8 space-y-4">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-[#9e9e9e]">倒數計時</span>
+              <span className="text-[var(--color-text-muted)]">倒數計時</span>
               <span className="text-white font-mono">{getNextWeatherChange()}</span>
             </div>
             <button 
@@ -174,12 +241,12 @@ export default function Dashboard({ et, onViewChange, events }: DashboardProps) 
       <ResetCountdown dailyProgress={progress.daily} weeklyProgress={progress.weekly} />
 
       {/* Upcoming Events Section */}
-      <div className="bg-[#1a1a1a] border border-white/5 rounded-3xl p-8 space-y-8">
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl p-8 space-y-8">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold uppercase tracking-widest text-[#D39E47]">接下來的活動</h3>
+          <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--color-accent)]">接下來的活動</h3>
           <button 
             onClick={() => handleViewChange('event-calendar')}
-            className="text-xs text-[#9e9e9e] hover:text-white transition-colors flex items-center gap-1"
+            className="text-xs text-[var(--color-text-muted)] hover:text-white transition-colors flex items-center gap-1"
           >
             查看完整行事曆 <ArrowRight size={12} />
           </button>
@@ -188,7 +255,7 @@ export default function Dashboard({ et, onViewChange, events }: DashboardProps) 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Official Events */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2 text-[#00B0FF]">
+            <div className="flex items-center gap-2 text-[var(--color-accent)]">
               <Bird size={16} />
               <h4 className="text-xs font-bold uppercase tracking-wider">官方活動</h4>
             </div>
@@ -200,43 +267,43 @@ export default function Dashboard({ et, onViewChange, events }: DashboardProps) 
                     href={event.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block p-4 bg-black/20 rounded-2xl border border-white/5 hover:border-[#00B0FF]/30 transition-all group"
+                    className="block p-4 bg-black/20 rounded-2xl border border-[var(--color-border)] hover:border-[var(--color-accent)]/30 transition-all group"
                   >
                     <div className="flex justify-between items-start gap-4">
-                      <h5 className="font-bold text-white group-hover:text-[#00B0FF] transition-colors">{event.title}</h5>
-                      <ExternalLink size={14} className="text-[#9e9e9e] shrink-0" />
+                      <h5 className="font-bold text-white group-hover:text-[var(--color-accent)] transition-colors">{event.title}</h5>
+                      <ExternalLink size={14} className="text-[var(--color-text-muted)] shrink-0" />
                     </div>
-                    {event.date && <p className="text-[10px] font-mono text-[#9e9e9e] mt-2">{formatEventDate(event.date)}</p>}
+                    {event.date && <p className="text-[10px] font-mono text-[var(--color-text-muted)] mt-2">{formatEventDate(event.date)}</p>}
                   </a>
                 ))
               ) : (
-                <p className="text-sm text-[#9e9e9e] italic py-4">目前沒有官方活動資訊</p>
+                <p className="text-sm text-[var(--color-text-muted)] italic py-4">目前沒有官方活動資訊</p>
               )}
             </div>
           </div>
 
           {/* Personal Events */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2 text-[#D39E47]">
+            <div className="flex items-center gap-2 text-[var(--color-accent)]">
               <Calendar size={16} />
               <h4 className="text-xs font-bold uppercase tracking-wider">個人行程</h4>
             </div>
             <div className="space-y-3">
               {upcomingEvents.length > 0 ? (
                 upcomingEvents.map(event => (
-                  <div key={event.id} className="p-4 bg-black/20 rounded-2xl border border-white/5">
+                  <div key={event.id} className="p-4 bg-black/20 rounded-2xl border border-[var(--color-border)]">
                     <h5 className="font-bold text-white mb-1">{event.title}</h5>
-                    <div className="flex items-center gap-2 text-[10px] font-mono text-[#9e9e9e] mb-2">
+                    <div className="flex items-center gap-2 text-[10px] font-mono text-[var(--color-text-muted)] mb-2">
                       <Clock size={10} />
                       {formatEventDate(event.date)}
                     </div>
-                    {event.desc && <p className="text-[10px] text-[#E0E0E0] line-clamp-1">{event.desc}</p>}
+                    {event.desc && <p className="text-[10px] text-[var(--color-text)] line-clamp-1">{event.desc}</p>}
                   </div>
                 ))
               ) : (
-                <div className="h-full flex flex-col items-center justify-center py-8 text-center space-y-2 bg-black/10 rounded-2xl border border-dashed border-white/5">
+                <div className="h-full flex flex-col items-center justify-center py-8 text-center space-y-2 bg-black/10 rounded-2xl border border-dashed border-[var(--color-border)]">
                   <Calendar size={24} className="text-white/10" />
-                  <p className="text-sm text-[#9e9e9e]">目前沒有活動安排</p>
+                  <p className="text-sm text-[var(--color-text-muted)]">目前沒有活動安排</p>
                 </div>
               )}
             </div>
@@ -246,37 +313,24 @@ export default function Dashboard({ et, onViewChange, events }: DashboardProps) 
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {tools.map((tool) => (
-          <button
+          <TiltCard
             key={tool.id}
+            tool={tool}
             onClick={() => handleViewChange(tool.id)}
-            className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-6 text-left hover:bg-[#222] hover:border-white/10 transition-all group"
-          >
-            <div className="flex justify-between items-start mb-4">
-              <div className={`w-12 h-12 ${tool.color} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform overflow-hidden p-2`}>
-                {tool.image ? (
-                  <img src={tool.image} alt="" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
-                ) : (
-                  <tool.icon size={24} className="text-white" />
-                )}
-              </div>
-            </div>
-            <h4 className="font-bold text-white mb-2">{tool.label}</h4>
-            <p className="text-xs text-[#9e9e9e] leading-relaxed">{tool.desc}</p>
-          </button>
+          />
         ))}
       </div>
-
       {/* Current Version Section */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <div className="h-1 w-8 bg-[#D39E47] rounded-full" />
-          <h3 className="text-sm font-bold uppercase tracking-widest text-[#D39E47]">繁中服目前版本：Patch 7.1</h3>
+          <div className="h-1 w-8 bg-[var(--color-accent)] rounded-full" />
+          <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--color-accent)]">繁中服目前版本：Patch 7.1</h3>
         </div>
         <a 
           href="https://www.ffxiv.com.tw/web/news/news_list.aspx?category=2" 
           target="_blank" 
           rel="noopener noreferrer"
-          className="block group relative overflow-hidden rounded-3xl border border-white/5 hover:border-[#D39E47]/30 transition-all"
+          className="block group relative overflow-hidden rounded-3xl border border-[var(--color-border)] hover:border-[var(--color-accent)]/30 transition-all"
         >
           <img 
             src="/patch/7-1.jpg" 
@@ -293,10 +347,10 @@ export default function Dashboard({ et, onViewChange, events }: DashboardProps) 
       </div>
 
       {/* Copyright Footer */}
-      <footer className="pt-10 pb-6 border-t border-white/5">
+      <footer className="pt-10 pb-6 border-t border-[var(--color-border)]">
         <div className="space-y-4">
-          <h5 className="text-xs font-bold text-[#D39E47] uppercase tracking-widest mb-2">版權與使用聲明</h5>
-          <p className="text-[11px] text-[#9e9e9e] leading-relaxed max-w-4xl">
+          <h5 className="text-xs font-bold text-[var(--color-accent)] uppercase tracking-widest mb-2">版權與使用聲明</h5>
+          <p className="text-[11px] text-[var(--color-text-muted)] leading-relaxed max-w-4xl">
             Final Fantasy XIV 遊戲由 SQUARE ENIX 製作。繁體中文版由宇峻奧汀與智寶國際聯合代理營運。<br />
             本網站為非官方粉絲向作品，不放置廣告、不設置任何盈利手段。所涉及的公司名稱、商標、產品等均為其各自所有者的資產，僅供玩家識別所用。<br />
             網站內使用的遊戲圖片（截圖、圖示等）版權為 SQUARE ENIX 所有。相關圖示來自 FFXIV Fan Kit，遵循官方使用條款與規範。所有遊戲相關圖片僅用於學習、研究和非商業用途，如有侵權請聯繫我們立即移除。<br />

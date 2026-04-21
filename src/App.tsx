@@ -134,10 +134,24 @@ export default function App() {
     }
   }, []);
 
+  // Stagger children 50ms per nav item when group opens
+  const navItemVariants = {
+    hidden: { opacity: 0, x: -8 },
+    visible: (i: number) => ({
+      opacity: 1,
+      x: 0,
+      transition: { delay: i * 0.05, duration: 0.2, ease: [0.22, 1, 0.36, 1] }
+    }),
+  };
+  const navContainerVariants = {
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.05 } },
+  };
+
   const [openGroups, setOpenGroups] = useState<string[]>([]);
 
   const toggleGroup = (label: string) => {
-    setOpenGroups(prev => 
+    setOpenGroups(prev =>
       prev.includes(label) ? prev.filter(g => g !== label) : [...prev, label]
     );
   };
@@ -202,10 +216,10 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] text-[#E0E0E0] font-sans selection:bg-[#D39E47]/30">
+    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] font-sans selection:bg-[var(--color-accent)]">
       <Toaster position="top-right" theme="dark" richColors closeButton />
       {/* Mobile Header */}
-      <header className="lg:hidden flex items-center justify-between p-4 border-b border-white/5 bg-[#1a1a1a]">
+      <header className="lg:hidden flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
         <button 
           onClick={() => setCurrentView('home')}
           className="flex items-center gap-2 hover:opacity-80 transition-opacity"
@@ -215,7 +229,7 @@ export default function App() {
         </button>
         <button 
           onClick={() => setIsSidebarOpen(true)}
-          className="p-2 hover:bg-white/5 rounded-lg transition-colors"
+          className="p-2 hover:bg-[var(--color-border)] rounded-lg transition-colors"
         >
           <Menu size={24} />
         </button>
@@ -224,7 +238,7 @@ export default function App() {
       <div className="flex h-[calc(100vh-64px)] lg:h-screen overflow-hidden">
         {/* Sidebar */}
         <aside className={`
-          fixed inset-y-0 left-0 z-50 w-64 bg-[#1a1a1a] border-r border-white/5 transform transition-transform duration-300 ease-in-out
+          fixed inset-y-0 left-0 z-50 w-64 bg-[var(--color-surface)] border-r border-[var(--color-border)] transform transition-transform duration-300 ease-in-out
           lg:relative lg:translate-x-0
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}>
@@ -233,10 +247,10 @@ export default function App() {
               onClick={() => setCurrentView('home')}
               className="p-6 hidden lg:flex items-center gap-3 hover:opacity-80 transition-opacity text-left"
             >
-              <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-xl shadow-lg shadow-amber-500/10" referrerPolicy="no-referrer" />
+              <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-xl shadow-lg shadow-[var(--color-accent-glow)]" referrerPolicy="no-referrer" />
               <div>
-                <h1 className="font-bold text-lg tracking-tight text-white">艾歐澤亞助手</h1>
-                <p className="text-[10px] uppercase tracking-widest text-[#D39E47] font-semibold">Utility Hub V1.9.0</p>
+                <h1 className="font-display font-bold text-lg tracking-tight text-white leading-tight">艾歐澤亞助手</h1>
+                <p className="text-[10px] uppercase tracking-widest text-[var(--color-accent)] font-semibold font-sans">Utility Hub V1.9.0</p>
               </div>
             </button>
 
@@ -245,16 +259,25 @@ export default function App() {
                 <div key={group.label} className="space-y-1">
                   <button 
                     onClick={() => toggleGroup(group.label)}
-                    className="w-full flex items-center justify-between px-4 text-[10px] font-bold text-[#666] uppercase tracking-widest mb-2 hover:text-white transition-colors"
+                    className="w-full flex items-center justify-between px-4 text-[10px] font-bold text-[var(--color-text-faint)] uppercase tracking-widest mb-2 hover:text-[var(--color-text-muted)] transition-colors"
                   >
                     {group.label}
                     <ChevronRight size={14} className={`transition-transform ${openGroups.includes(group.label) ? 'rotate-90' : ''}`} />
                   </button>
                   {openGroups.includes(group.label) && (
-                    <div className="space-y-1">
-                      {group.items.map((item) => (
-                        <button
+                    <motion.div
+                      key={group.label}
+                      variants={navContainerVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="hidden"
+                      className="space-y-1"
+                    >
+                      {group.items.map((item, i) => (
+                        <motion.button
                           key={item.id}
+                          custom={i}
+                          variants={navItemVariants}
                           onClick={() => {
                             setCurrentView(item.id as View);
                             setIsSidebarOpen(false);
@@ -264,48 +287,48 @@ export default function App() {
                           }}
                           className={`
                             w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group
-                            ${currentView === item.id 
-                              ? 'bg-[#D39E47] text-black font-semibold shadow-lg shadow-[#D39E47]/10' 
-                              : 'hover:bg-white/5 text-[#9e9e9e] hover:text-white'}
+                            ${currentView === item.id
+                              ? 'bg-[var(--color-accent)] text-[#0E0E10] font-semibold shadow-lg shadow-[var(--color-accent-glow)]'
+                              : 'hover:bg-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)]'}
                           `}
                         >
                           {item.image ? (
-                            <img 
-                              src={item.image} 
-                              alt="" 
-                              className={`w-5 h-5 object-contain transition-transform ${currentView === item.id ? 'scale-110' : 'group-hover:scale-110 opacity-70 hover:opacity-100'}`} 
+                            <img
+                              src={item.image}
+                              alt=""
+                              className={`w-5 h-5 object-contain transition-transform ${currentView === item.id ? 'scale-110' : 'group-hover:scale-110 opacity-70 hover:opacity-100'}`}
                               referrerPolicy="no-referrer"
                             />
                           ) : (
-                            <item.icon size={20} className={currentView === item.id ? 'text-black' : 'group-hover:scale-110 transition-transform'} />
+                            <item.icon size={20} className={currentView === item.id ? 'text-[#0E0E10]' : 'group-hover:scale-110 transition-transform text-[var(--color-text-muted)]'} />
                           )}
                           <span className="text-sm">{item.label}</span>
-                        </button>
+                        </motion.button>
                       ))}
-                    </div>
+                    </motion.div>
                   )}
                 </div>
               ))}
             </nav>
 
-            <div className="p-4 border-t border-white/5 space-y-2">
-              <div className="bg-black/20 rounded-2xl p-3 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#00B0FF]/20 flex items-center justify-center shrink-0">
-                  <Clock size={16} className="text-[#00B0FF]" />
+            <div className="p-4 border-t border-[var(--color-border)] space-y-2">
+              <div className="bg-[var(--color-bg)] rounded-2xl p-3 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[var(--color-accent-dim)] flex items-center justify-center shrink-0">
+                  <Clock size={16} className="text-[var(--color-accent)]" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-[#9e9e9e] uppercase font-bold tracking-tighter">艾歐澤亞時間 (ET)</p>
+                  <p className="text-[10px] text-[var(--color-text-muted)] uppercase font-bold tracking-tighter">艾歐澤亞時間 (ET)</p>
                   <p className="text-lg font-mono font-medium text-white leading-none">
                     {String(et.hours).padStart(2, '0')}:{String(et.minutes).padStart(2, '0')}
                   </p>
                 </div>
               </div>
-              <div className="bg-black/20 rounded-2xl p-3 flex items-center gap-3">
+              <div className="bg-[var(--color-bg)] rounded-2xl p-3 flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
                   <Clock size={16} className="text-emerald-500" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-[#9e9e9e] uppercase font-bold tracking-tighter">本地時間 (LT)</p>
+                  <p className="text-[10px] text-[var(--color-text-muted)] uppercase font-bold tracking-tighter">本地時間 (LT)</p>
                   <p className="text-lg font-mono font-medium text-white leading-none">
                     {localTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
                   </p>
@@ -317,28 +340,27 @@ export default function App() {
           {/* Mobile Close Button */}
           <button 
             onClick={() => setIsSidebarOpen(false)}
-            className="lg:hidden absolute top-4 right-4 p-2 text-[#9e9e9e]"
+            className="lg:hidden absolute top-4 right-4 p-2 text-[var(--color-text-muted)]"
           >
             <X size={24} />
           </button>
         </aside>
 
         {/* Main Content */}
-        <main id="main-content" className="flex-1 overflow-y-auto bg-[#121212] relative">
+        <main id="main-content" className="flex-1 overflow-y-auto bg-[var(--color-bg)] relative">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentView}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
+              initial={{ opacity: 0, scale: 0.97, filter: 'blur(4px)' }}
+              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, scale: 0.97, filter: 'blur(4px)' }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
               className="p-6 lg:p-10 max-w-7xl mx-auto"
             >
               {renderView()}
             </motion.div>
           </AnimatePresence>
-          
-          {/* Back to Top Button */}
+          {/* Back to Top Button — inside main so it scrolls with content */}
           <motion.button
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -346,7 +368,7 @@ export default function App() {
               const main = document.getElementById('main-content');
               if (main) main.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            className="fixed bottom-6 right-6 p-3 bg-[#D39E47] text-black rounded-full shadow-lg hover:bg-[#b88a3d] transition-colors z-50"
+            className="fixed bottom-6 right-6 p-3 bg-[var(--color-accent)] text-[#0E0E10] rounded-full shadow-lg hover:brightness-110 transition-all z-50"
           >
             <ChevronRight className="rotate-[-90deg]" size={24} />
           </motion.button>
@@ -355,7 +377,7 @@ export default function App() {
 
       {/* Overlay for mobile sidebar */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />

@@ -1,68 +1,125 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+/* ── Fonts ──────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 @import "react-datepicker/dist/react-datepicker.css";
 
-@theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+/* ── CSS Variables ──────────────────────────────────────────────────────── */
+:root {
+  --color-bg:          #0E0E10;
+  --color-surface:     #1A1A1E;
+  --color-surface-2:   #222228;
+  --color-border:      rgba(255, 255, 255, 0.07);
+  --color-border-hover:rgba(255, 255, 255, 0.14);
+  --color-accent:      #E8B84B;
+  --color-accent-dim:  rgba(232, 184, 75, 0.12);
+  --color-accent-glow: rgba(232, 184, 75, 0.25);
+  --color-text:        #F0EDE6;
+  --color-text-muted:  #7A7A7A;
+  --color-text-faint:  #4A4A52;
+  --font-display:      "Cinzel", "Noto Serif TC", "Songti TC", serif;
+  --font-sans:         "DM Sans", "Noto Sans TC", ui-sans-serif, system-ui, sans-serif;
+  --font-mono:         "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
-/* Custom styles for react-datepicker to match theme */
+@theme {
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+/* ── React Datepicker ───────────────────────────────────────────────────── */
 .react-datepicker {
-  background-color: #1a1a1a !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
-  color: white !important;
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
 }
 .react-datepicker__header {
-  background-color: #1a1a1a !important;
-  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+  background-color: var(--color-surface) !important;
+  border-bottom-color: var(--color-border) !important;
 }
-.react-datepicker__day-name, .react-datepicker__day, .react-datepicker__current-month, .react-datepicker__time-name {
-  color: white !important;
+.react-datepicker__day-name,
+.react-datepicker__day,
+.react-datepicker__current-month,
+.react-datepicker__time-name {
+  color: var(--color-text) !important;
 }
 .react-datepicker__day:hover {
-  background-color: #D39E47 !important;
-  color: black !important;
+  background-color: var(--color-accent) !important;
+  color: #0E0E10 !important;
 }
 .react-datepicker__day--selected {
-  background-color: #D39E47 !important;
-  color: black !important;
+  background-color: var(--color-accent) !important;
+  color: #0E0E10 !important;
 }
 .react-datepicker__time-container {
-  border-left-color: rgba(255, 255, 255, 0.1) !important;
-  background-color: #1a1a1a !important;
+  border-left-color: var(--color-border) !important;
+  background-color: var(--color-surface) !important;
 }
 .react-datepicker__time-header {
-  color: white !important;
-  background-color: #1a1a1a !important;
+  color: var(--color-text) !important;
+  background-color: var(--color-surface) !important;
 }
-.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item {
-  color: white !important;
-  background-color: #1a1a1a !important;
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box
+  ul.react-datepicker__time-list li.react-datepicker__time-list-item {
+  color: var(--color-text) !important;
+  background-color: var(--color-surface) !important;
 }
-.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item:hover {
-  background-color: #D39E47 !important;
-  color: black !important;
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box
+  ul.react-datepicker__time-list li.react-datepicker__time-list-item:hover {
+  background-color: var(--color-accent) !important;
+  color: #0E0E10 !important;
 }
-.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected {
-  background-color: #D39E47 !important;
-  color: black !important;
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box
+  ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected {
+  background-color: var(--color-accent) !important;
+  color: #0E0E10 !important;
 }
 
+/* ── Base & Typography ──────────────────────────────────────────────────── */
 @layer base {
   body {
     @apply antialiased;
+    font-family: var(--font-sans);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  /* Branded selection */
+  ::selection {
+    background-color: var(--color-accent);
+    color: #0E0E10;
   }
 }
 
+/* ── Display / Hero Typography ──────────────────────────────────────────── */
+/* Cinzel for all display headings — gives the FF14 epic-mediterranean feel */
+.display-heading {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  line-height: 1.1;
+}
+
+/* Section label — small caps feel, all-caps tracked */
+.section-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────────────────── */
 @layer utilities {
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    @apply bg-transparent;
-  }
+  .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
+    background: rgba(255,255,255,0.08);
+    border-radius: 99px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.16);
   }
 }
