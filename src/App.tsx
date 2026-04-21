@@ -23,8 +23,10 @@ import {
   ShoppingCart,
   Map as MapIcon,
   Bell,
-  Calendar
+  Calendar,
+  Volume2
 } from 'lucide-react';
+import { Toaster, toast } from 'sonner';
 import { getEorzeaTime } from './utils/ff14';
 
 // Components
@@ -42,10 +44,11 @@ import UsefulLinks from './components/UsefulLinks';
 import TreasureHunt from './components/TreasureHunt';
 import EventCalendar, { CalendarEvent } from './components/EventCalendar';
 import SetAlarm from './components/SetAlarm';
+import InteractiveMaps from './components/InteractiveMaps';
 
 import { Alarm, EorzeaTime } from './types';
 
-type View = 'home' | 'cactpot' | 'tails' | 'weather' | 'sightseeing' | 'changelog' | 'chocobo' | 'checklist' | 'guide' | 'market' | 'links' | 'treasure' | 'alarm' | 'event-calendar';
+type View = 'home' | 'cactpot' | 'tails' | 'weather' | 'sightseeing' | 'changelog' | 'chocobo' | 'checklist' | 'guide' | 'market' | 'links' | 'treasure' | 'alarm' | 'event-calendar' | 'interactive-maps';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<View>('home');
@@ -92,13 +95,28 @@ export default function App() {
     const nextAlarms = alarms.map(alarm => {
       if (alarm.active && now >= alarm.targetTime) {
         // Trigger notification
-        if (Notification.permission === 'granted') {
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
           new Notification('艾歐澤亞助手 - 鬧鐘提醒', {
             body: `${alarm.label} 時間到了！`,
             icon: '/logo.png',
-            tag: alarm.id // Use tag to prevent duplicate notifications for the same alarm
+            tag: alarm.id
           });
         }
+
+        // Trigger in-app toast
+        toast.success(`${alarm.label} 時間到了！`, {
+          description: `設定時間：${alarm.targetTime.toLocaleTimeString()}`,
+          duration: 10000,
+          icon: <Bell className="text-amber-500" size={18} />
+        });
+
+        // Play sound
+        try {
+          const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+          audio.volume = 0.5;
+          audio.play().catch(e => console.log('Audio play blocked:', e));
+        } catch (e) {}
+
         changed = true;
         return { ...alarm, active: false };
       }
@@ -111,7 +129,7 @@ export default function App() {
   }, [now, alarms]);
 
   useEffect(() => {
-    if (Notification.permission === 'default') {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
       Notification.requestPermission();
     }
   }, []);
@@ -130,14 +148,14 @@ export default function App() {
       items: [
         { id: 'home', label: '總覽', icon: Home, image: '/tools/Dashboard.png' },
         { id: 'checklist', label: '任務進度', icon: CheckSquare, image: '/tools/DutyChecklist.png' },
-        { id: 'tails', label: '庫洛天書', icon: BookOpen, image: '/tools/WondrousTails.png' },
+        { id: 'alarm', label: '自訂鬧鐘', icon: Bell, image: '/tools/SetAlarm.png' },
+        { id: 'event-calendar', label: '活動行事曆', icon: Calendar, image: '/tools/EventCalendar.png' },
       ]
     },
     {
       label: '實用工具',
       items: [
-        { id: 'alarm', label: '自訂鬧鐘', icon: Bell, image: '/tools/SetAlarm.png' },
-        { id: 'event-calendar', label: '活動行事曆', icon: Calendar, image: '/tools/EventCalendar.png' },
+        { id: 'tails', label: '庫洛天書', icon: BookOpen, image: '/tools/WondrousTails.png' },
         { id: 'market', label: '市場查詢', icon: ShoppingCart, image: '/tools/MarketBoard.png' },
         { id: 'treasure', label: '藏寶搜尋', icon: MapIcon, image: '/tools/TreasureHunt.png' },
         { id: 'cactpot', label: '仙人微彩', icon: Grid3X3, image: '/tools/MiniCactpot.png' },
@@ -148,6 +166,7 @@ export default function App() {
       label: '地圖與天氣',
       items: [
         { id: 'weather', label: '天氣預報', icon: CloudSun, image: '/tools/Skywatcher.png' },
+        { id: 'interactive-maps', label: '互動地圖', icon: MapIcon, image: '/tools/InteractiveMaps.png' },
         { id: 'sightseeing', label: '探索筆記', icon: Clock, image: '/tools/SightseeingLog.png' },
       ]
     },
@@ -171,6 +190,7 @@ export default function App() {
       case 'cactpot': return <MiniCactpot />;
       case 'tails': return <WondrousTails />;
       case 'weather': return <Skywatcher et={et} />;
+      case 'interactive-maps': return <InteractiveMaps />;
       case 'treasure': return <TreasureHunt />;
       case 'chocobo': return <ChocoboColor />;
       case 'sightseeing': return <SightseeingLog et={et} />;
@@ -183,6 +203,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#121212] text-[#E0E0E0] font-sans selection:bg-[#D39E47]/30">
+      <Toaster position="top-right" theme="dark" richColors closeButton />
       {/* Mobile Header */}
       <header className="lg:hidden flex items-center justify-between p-4 border-b border-white/5 bg-[#1a1a1a]">
         <button 
@@ -215,7 +236,7 @@ export default function App() {
               <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-xl shadow-lg shadow-amber-500/10" referrerPolicy="no-referrer" />
               <div>
                 <h1 className="font-bold text-lg tracking-tight text-white">艾歐澤亞助手</h1>
-                <p className="text-[10px] uppercase tracking-widest text-[#D39E47] font-semibold">Utility Hub V1.8.0</p>
+                <p className="text-[10px] uppercase tracking-widest text-[#D39E47] font-semibold">Utility Hub V1.9.0</p>
               </div>
             </button>
 

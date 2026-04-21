@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Clock, Trash2, CalendarDays, CalendarRange, FileText, Anchor, Briefcase, Compass, Sword, ShieldCheck } from 'lucide-react';
+import { Bell, Clock, Trash2, CalendarDays, CalendarRange, FileText, Anchor, Briefcase, Compass, Sword, ShieldCheck, Volume2 } from 'lucide-react';
 import { motion } from 'motion/react';
 
 import { Alarm } from '../types';
@@ -94,6 +94,37 @@ export default function SetAlarm({ alarms, setAlarms, now }: SetAlarmProps) {
     { label: '冒險者小隊分隊任務', duration: 18, icon: ShieldCheck, color: 'text-sky-500' },
   ];
 
+  const requestPermission = () => {
+    if (typeof Notification !== 'undefined') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          alert('通知權限已開啟！');
+        } else {
+          alert('通知權限被拒絕，請在瀏覽器設定中手動開啟。');
+        }
+      });
+    }
+  };
+
+  const testNotification = () => {
+    // Test browser notification
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      new Notification('艾歐澤亞助手 - 測試通知', {
+        body: '這是一個測試通知，如果您看到這個，代表瀏覽器通知功能正常。',
+        icon: '/logo.png'
+      });
+    } else {
+      alert('瀏覽器通知權限尚未開啟，或您的瀏覽器不支援。');
+    }
+
+    // Test sound
+    try {
+      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+      audio.volume = 0.5;
+      audio.play().catch(e => console.log('Audio play blocked:', e));
+    } catch (e) {}
+  };
+
   return (
     <div className="space-y-8">
       <header className="space-y-4">
@@ -101,12 +132,35 @@ export default function SetAlarm({ alarms, setAlarms, now }: SetAlarmProps) {
           <img src="/tools/SetAlarm.png" alt="" className="w-6 h-6 object-contain" referrerPolicy="no-referrer" />
           <h2 className="text-sm font-bold uppercase tracking-[0.3em] text-[#D39E47]">Alarm Clock</h2>
         </div>
-        <h1 className="text-4xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
-          自訂 <span className="text-[#D39E47]">鬧鐘提醒</span>
-        </h1>
-        <p className="text-[#9e9e9e] max-w-2xl">
-          設定各類遊戲內提醒，確保不錯過任何冒險節奏。當計時到達時，將透過瀏覽器發送通知。
-        </p>
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+          <div className="space-y-4">
+            <h1 className="text-4xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
+              自訂 <span className="text-[#D39E47]">鬧鐘提醒</span>
+            </h1>
+            <p className="text-[#9e9e9e] max-w-2xl">
+              設定各類遊戲內提醒，確保不錯過任何冒險節奏。當計時到達時，將透過瀏覽器發送通知並播放提示音。
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button 
+              onClick={requestPermission}
+              className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold text-white transition-colors flex items-center gap-2"
+            >
+              <Bell size={14} /> 請求通知權限
+            </button>
+            <button 
+              onClick={testNotification}
+              className="px-4 py-2 bg-[#D39E47]/10 hover:bg-[#D39E47]/20 border border-[#D39E47]/20 rounded-xl text-xs font-bold text-[#D39E47] transition-colors flex items-center gap-2"
+            >
+              <Volume2 size={14} /> 測試提醒功能
+            </button>
+          </div>
+        </div>
+        <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
+          <p className="text-xs text-amber-200 leading-relaxed">
+            <span className="font-bold">提示：</span> 如果您在 iframe 中使用本工具，瀏覽器可能會封鎖通知。建議點擊右上角「在新分頁開啟」以獲得最佳提醒體驗。
+          </p>
+        </div>
       </header>
 
       <div className="space-y-2">

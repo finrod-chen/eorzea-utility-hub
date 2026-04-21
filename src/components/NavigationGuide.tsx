@@ -85,6 +85,7 @@ const guideItems = [
     desc: '整合 Universalis API，即時查詢各伺服器道具售價與交易紀錄。支援跨伺服器價格對比。',
     tips: [
       '搜尋功能支援「中文/英文」道具名稱查詢。',
+      '滑鼠懸停在道具名稱上可顯示 Cafekit 懸浮窗，查看詳細屬性。',
       '可以選擇特定伺服器或整個大區 (Data Center) 進行查詢。',
       '數據更新頻率取決於玩家上傳至 Universalis 的情況。'
     ]
@@ -101,6 +102,19 @@ const guideItems = [
       '天氣每 8 小時（艾歐澤亞時間）變換一次。',
       '變換點分別為 ET 0:00, 8:00, 16:00。',
       '可以使用篩選功能快速找出「雨天」或「雷雨」等特定天氣。'
+    ]
+  },
+  {
+    id: 'interactive-maps',
+    label: '互動地圖 (Interactive Maps)',
+    icon: MapIcon,
+    image: '/tools/InteractiveMaps.png',
+    color: 'text-blue-500',
+    bg: 'bg-blue-500/10',
+    desc: '探索艾歐澤亞的地理資訊，查看各區域的資源與標記。整合 FFCafe 肥肥咖啡的互動地圖工具。',
+    tips: [
+      '支援縮放與拖拽，點擊標記可查看詳細資訊。',
+      '資料來源由 FFCafe 肥肥咖啡提供。'
     ]
   },
   {
@@ -157,20 +171,6 @@ const guideItems = [
       '列表會根據當前 ET 時間自動排序。',
       '標註了每個目標所需的特定表情動作。',
       '結合天氣預報功能，提前規劃行程。'
-    ]
-  },
-  {
-    id: 'dungeon-guide',
-    label: '副本速查 (Dungeon Guide)',
-    icon: Layers,
-    image: '/tools/DungeonGuide.png',
-    color: 'text-[#D39E47]',
-    bg: 'bg-[#D39E47]/10',
-    desc: '專為冒險者設計的「一句話攻略」。在副本過場動畫時，快速複習關鍵機制與職能重點。',
-    tips: [
-      '支援中文、英文與等級搜尋。',
-      '區分坦克、補職、輸出與全員的專屬提醒。',
-      '按資料片版本分類，方便快速查找。'
     ]
   },
   {

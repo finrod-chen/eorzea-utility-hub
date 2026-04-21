@@ -5,12 +5,13 @@ import { motion } from 'motion/react';
 const updates = [
   {
     version: 'v1.9.0',
-    date: '2026-03-25',
-    title: '副本機制速查功能上線',
+    date: '2026-03-31',
+    title: '互動地圖與市場查詢優化',
     items: [
-      { type: 'feature', text: '新增「副本機制速查 (Dungeon Guide)」功能，提供各類副本的一句話核心攻略。' },
-      { type: 'feature', text: '支援職能專屬提醒（坦/補/輸），並以顏色與圖示區分。' },
-      { type: 'feature', text: '新增版本篩選功能，支援 2.0 至 7.0 的副本查詢。' }
+      { type: 'feature', text: '新增「互動地圖 (Interactive Maps)」功能，整合 FFCafe 肥肥咖啡的艾歐澤亞地圖工具。' },
+      { type: 'feature', text: '市場查詢 (Market Board) 整合 Cafekit 懸浮窗，支援滑鼠懸停顯示道具詳細屬性。' },
+      { type: 'improvement', text: '優化互動地圖介面，移除冗餘搜尋功能並將資料來源移至底部。' },
+      { type: 'improvement', text: '優化側邊選單分類，將地圖相關工具整合至「地圖與天氣」分組。' }
     ]
   },
   {

@@ -93,6 +93,12 @@ const COMMON_ITEMS = [
   { id: 36258, name: '自負靈砂' },
 ];
 
+declare global {
+  interface Window {
+    xivkit: any;
+  }
+}
+
 export default function MarketBoard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDC, setSelectedDC] = useState('繁中服 (陸行鳥)');
@@ -114,6 +120,28 @@ export default function MarketBoard() {
     localStorage.setItem('ff14-market-favorites', JSON.stringify(favorites));
   }, [favorites]);
 
+  const [isSearching, setIsSearching] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<SearchResult | null>(null);
+  const [marketData, setMarketData] = useState<MarketItem | null>(null);
+  const [isLoadingData, setIsLoadingData] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Refresh tooltips when items change
+  useEffect(() => {
+    if (window.xivkit?.tooltip) {
+      // Try to set language to Traditional Chinese
+      try {
+        window.xivkit.tooltip.config({ lang: 'zh-tw' });
+      } catch (e) {}
+      
+      // Refresh tooltips for newly rendered elements
+      const timer = setTimeout(() => {
+        window.xivkit.tooltip.refresh();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [searchResults, favorites, selectedItem]);
+
   const toggleFavorite = (item: SearchResult) => {
     setFavorites(prev => {
       const exists = prev.find(f => getItemId(f) === getItemId(item));
@@ -125,11 +153,6 @@ export default function MarketBoard() {
   };
 
   const isFavorite = (id: number) => favorites.some(f => getItemId(f) === id);
-  const [isSearching, setIsSearching] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<SearchResult | null>(null);
-  const [marketData, setMarketData] = useState<MarketItem | null>(null);
-  const [isLoadingData, setIsLoadingData] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const isChinese = (text: string) => /[\u4e00-\u9fa5]/.test(text);
 
@@ -427,7 +450,12 @@ export default function MarketBoard() {
                 </p>
                 <div className="grid grid-cols-1 gap-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
                   {favorites.map((item) => (
-                    <div key={`fav-${getItemId(item)}`} className="flex items-center gap-2 group">
+                    <div 
+                      key={`fav-${getItemId(item)}`} 
+                      className="flex items-center gap-2 group"
+                      data-xivkit-type="item"
+                      data-xivkit-id={getItemId(item)}
+                    >
                       <button
                         onClick={() => fetchMarketData(item)}
                         className={`flex-1 flex items-center gap-3 p-2 rounded-xl border transition-all text-left ${getItemId(selectedItem) === getItemId(item) ? 'bg-[#D39E47]/10 border-[#D39E47]' : 'bg-black/20 border-white/5 hover:border-white/20'}`}
@@ -477,6 +505,8 @@ export default function MarketBoard() {
                 {searchResults.map((item) => (
                   <div
                     key={getItemId(item)}
+                    data-xivkit-type="item"
+                    data-xivkit-id={getItemId(item)}
                     className={`w-full flex items-center gap-3 p-3 rounded-2xl border transition-all group ${getItemId(selectedItem) === getItemId(item) ? 'bg-[#D39E47]/10 border-[#D39E47]' : 'bg-black/20 border-white/5 hover:border-white/20'}`}
                   >
                     <button
@@ -545,7 +575,11 @@ export default function MarketBoard() {
                 className="space-y-6"
               >
                 {/* Item Summary Card */}
-                <div className="bg-[#1a1a1a] border border-white/5 rounded-3xl p-6 flex flex-col md:flex-row gap-6 items-center">
+                <div 
+                  className="bg-[#1a1a1a] border border-white/5 rounded-3xl p-6 flex flex-col md:flex-row gap-6 items-center"
+                  data-xivkit-type="item"
+                  data-xivkit-id={getItemId(selectedItem)}
+                >
                   <img src={`https://xivapi.com${getItemIcon(selectedItem)}`} alt="" className="w-24 h-24 rounded-2xl shadow-2xl" referrerPolicy="no-referrer" />
                   <div className="flex-1 text-center md:text-left">
                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-2">
