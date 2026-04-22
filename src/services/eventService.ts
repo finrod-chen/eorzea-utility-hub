@@ -70,13 +70,6 @@ export const fetchOfficialEvents = async (): Promise<OfficialEvent[]> => {
     console.warn('VITE_N8N_EVENTS_URL is not defined in the environment');
   }
 
-  // 3. Fallback
-  return [
-    {
-      eventid: 'mogumogu-2024',
-      title: '03/24 莫古莫古★大收集～黃金的魔典～',
-      url: 'https://www.ffxiv.com.tw/web/news/news_content.aspx?id=QAYgDD96jjqO',
-      date: '2024-03-24T00:00:00.000Z'
-    }
-  ];
+  // 3. Fallback — return empty array instead of stale hardcoded data
+  return [];
 };
