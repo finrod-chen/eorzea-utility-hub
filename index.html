@@ -25,6 +25,14 @@
     <meta name="twitter:image"       content="https://ff14.calcnest.tw/og-image-compressed.jpg" />
   </head>
   <body>
+    <!-- Loading screen — shown before React hydrates -->
+    <div id="loading-screen">
+      <img src="/logo.png" alt="" class="loading-logo" referrerPolicy="no-referrer" />
+      <span class="loading-title">艾歐澤亞助手</span>
+      <span class="loading-subtitle">Loading</span>
+      <div class="loading-spinner"></div>
+    </div>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

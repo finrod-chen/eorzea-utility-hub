@@ -91,6 +91,66 @@
   }
 }
 
+/* ── Loading Screen ────────────────────────────────────────────────────── */
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: #0E0E10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  transition: opacity 0.4s ease;
+}
+
+#loading-screen.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.loading-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: #F0EDE6;
+  letter-spacing: 0.05em;
+}
+
+.loading-subtitle {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #E8B84B;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(232, 184, 75, 0.15);
+  border-top-color: #E8B84B;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232, 184, 75, 0); }
+  50%       { box-shadow: 0 0 24px 8px rgba(232, 184, 75, 0.2); }
+}
+
 /* ── Display / Hero Typography ──────────────────────────────────────────── */
 /* Cinzel for all display headings — gives the FF14 epic-mediterranean feel */
 .display-heading {
