@@ -46,6 +46,7 @@ import EventCalendar, { CalendarEvent } from './components/EventCalendar';
 import SetAlarm from './components/SetAlarm';
 import InteractiveMaps from './components/InteractiveMaps';
 
+import KoFiWidget from './components/KoFiWidget';
 import { Alarm, EorzeaTime, View } from './types';
 import { NAV_GROUPS } from './constants/tools';
 
@@ -339,8 +340,7 @@ export default function App() {
                 </div>
               </div>
               <div className="kofi-widget-wrapper">
-                <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
-                <script type='text/javascript'>kofiwidget2.init('請我喝杯咖啡！', '#181729', 'J3J71YZHHS');kofiwidget2.draw();</script>
+                <KoFiWidget />
               </div>
             </div>
           </div>

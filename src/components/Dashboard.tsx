@@ -7,6 +7,7 @@ import { INITIAL_TASKS } from '../constants/tasks';
 import { getProgress } from '../utils/taskUtils';
 import { NAV_GROUPS } from '../constants/tools';
 import { View } from '../types';
+import KoFiWidget from './KoFiWidget';
 import { fetchOfficialEvents, OfficialEvent } from '../services/eventService';
 
 // ── 3D Tilt Card ────────────────────────────────────────────────────────────
@@ -243,8 +244,7 @@ export default function Dashboard({ et, onViewChange, events }: DashboardProps) 
           </p>
         </div>
         <div className="shrink-0">
-          <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
-          <script type='text/javascript'>kofiwidget2.init('請我喝杯咖啡！', '#181729', 'J3J71YZHHS');kofiwidget2.draw();</script>
+          <KoFiWidget />
         </div>
       </div>
 
