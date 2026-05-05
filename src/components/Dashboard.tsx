@@ -353,11 +353,11 @@ export default function Dashboard({ et, onViewChange, events }: DashboardProps) 
           </div>
         </a>
       </div>
-
       {/* Copyright Footer */}
       <footer className="pt-10 pb-6 border-t border-[var(--color-border)]">
         <div className="space-y-4">
           <h5 className="text-xs font-bold text-[var(--color-accent)] uppercase tracking-widest mb-2">版權與使用聲明</h5>
+
           <p className="text-[11px] text-[var(--color-text-muted)] leading-relaxed max-w-4xl">
             Final Fantasy XIV 遊戲由 SQUARE ENIX 製作。繁體中文版由宇峻奧汀與智寶國際聯合代理營運。<br />
             本網站為非官方粉絲向作品，不放置廣告、不設置任何盈利手段。所涉及的公司名稱、商標、產品等均為其各自所有者的資產，僅供玩家識別所用。<br />
@@ -365,6 +365,12 @@ export default function Dashboard({ et, onViewChange, events }: DashboardProps) 
             記載されている会社名・製品名・システム名などは、各社の商標、または登録商標です。<br />
             Copyright (C) 2010 - 2025 SQUARE ENIX CO., LTD. All Rights Reserved.
           </p>
+        </div>
+
+        <div className="mt-6">
+          <a href="https://fwfw.app/item/ff14-toolkit" target="_blank" rel="noopener noreferrer">
+            <img src="https://fwfw.app/badge-black.svg" width="250" height="54" alt="Featured on FWFW" referrerPolicy="no-referrer" />
+          </a>
         </div>
       </footer>
     </div>
