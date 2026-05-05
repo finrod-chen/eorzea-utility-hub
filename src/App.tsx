@@ -338,6 +338,10 @@ export default function App() {
                   </p>
                 </div>
               </div>
+              <div className="kofi-widget-wrapper">
+                <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+                <script type='text/javascript'>kofiwidget2.init('請我喝杯咖啡！', '#181729', 'J3J71YZHHS');kofiwidget2.draw();</script>
+              </div>
             </div>
           </div>
 

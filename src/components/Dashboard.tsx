@@ -231,6 +231,23 @@ export default function Dashboard({ et, onViewChange, events }: DashboardProps) 
       {/* Reset Countdowns */}
       <ResetCountdown dailyProgress={progress.daily} weeklyProgress={progress.weekly} />
 
+      {/* Support / Ko-fi */}
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-5 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-[#D39E47]/20 flex items-center justify-center shrink-0">
+            <span className="text-base">☕</span>
+          </div>
+          <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
+            如果這個工具有幫你省到時間，<br className="hidden sm:block" />
+            可以請我一杯飲料，幫助我持續更新 🙌
+          </p>
+        </div>
+        <div className="shrink-0">
+          <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+          <script type='text/javascript'>kofiwidget2.init('請我喝杯咖啡！', '#181729', 'J3J71YZHHS');kofiwidget2.draw();</script>
+        </div>
+      </div>
+
       {/* Upcoming Events Section */}
       <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl p-8 space-y-8">
         <div className="flex items-center justify-between">
