@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { Grid3X3, RotateCcw, HelpCircle, TrendingUp, Star, AlertCircle } from 'lucide-react';
 import { CACTPOT_PAYOUTS } from '../utils/ff14';
+import { useTranslation } from 'react-i18next';
 
 const LINES = [
   { name: 'Row 1', indices: [0, 1, 2] },
@@ -15,6 +16,7 @@ const LINES = [
 ];
 
 export default function MiniCactpot() {
+  const { t } = useTranslation();
   const [grid, setGrid] = useState<(number | null)[]>(Array(9).fill(null));
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
@@ -117,8 +119,8 @@ export default function MiniCactpot() {
             <img src="/tools/MiniCactpot.png" alt="" className="w-5 h-5 object-contain" referrerPolicy="no-referrer" />
             <span className="text-xs font-bold uppercase tracking-widest">Mini Cactpot</span>
           </div>
-          <h1 className="text-3xl font-bold text-white">仙人微彩計算器</h1>
-          <p className="text-[#9e9e9e] text-sm max-w-md">輸入已知的數字，我們將為您計算每一條路線的期望值與最高回報機率。</p>
+<h1 className="text-3xl font-bold text-white">{t('miniCactpot.title')}</h1>
+          <p className="text-[#9e9e9e] text-sm max-w-md">{t('miniCactpot.subtitle')}</p>
         </div>
         <div className="flex gap-3">
           <button onClick={reset} className="p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-[#9e9e9e] hover:text-white">
@@ -173,7 +175,7 @@ export default function MiniCactpot() {
               }}
               className="py-4 rounded-xl font-bold bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all"
             >
-              清除
+              {t('miniCactpot.clear')}
             </button>
           </div>
         </div>
@@ -183,15 +185,15 @@ export default function MiniCactpot() {
           <div className="bg-[#1a1a1a] rounded-3xl p-6 border border-white/5">
             <div className="flex items-center gap-2 mb-4">
               <TrendingUp size={18} className="text-[#D39E47]" />
-              <h3 className="text-sm font-bold text-[#D39E47] uppercase tracking-widest">建議路線</h3>
+              <h3 className="text-sm font-bold text-[#D39E47] uppercase tracking-widest">{t('miniCactpot.suggestedRoutes')}</h3>
             </div>
             
             {analysis.some(l => isNaN(l.expectedValue)) && (
               <div className="mb-4 p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex gap-3">
                 <AlertCircle className="text-amber-500 shrink-0" size={18} />
                 <p className="text-[11px] text-[#9e9e9e] leading-relaxed">
-                  <span className="text-amber-500 font-bold block mb-1">分析提示</span>
-                  可用的數字組合不足以計算期望值，請嘗試填入更多已知的數字。
+<span className="text-amber-500 font-bold block mb-1">{t('miniCactpot.analysisTips')}</span>
+                  {t('miniCactpot.notEnoughData')}
                 </p>
               </div>
             )}
@@ -208,13 +210,13 @@ export default function MiniCactpot() {
                   </div>
                   <div className="flex justify-between items-end">
                     <div>
-                      <p className="text-[10px] text-[#9e9e9e] uppercase font-bold tracking-tighter">期望值</p>
+                      <p className="text-[10px] text-[#9e9e9e] uppercase font-bold tracking-tighter">{t('miniCactpot.expectedValue')}</p>
                       <p className={`text-lg font-mono font-bold ${idx === 0 && !isNaN(line.expectedValue) ? 'text-[#D39E47]' : 'text-white'}`}>
                         {isNaN(line.expectedValue) ? '---' : Math.round(line.expectedValue).toLocaleString()}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[10px] text-[#9e9e9e] uppercase font-bold tracking-tighter">最高回報</p>
+                      <p className="text-[10px] text-[#9e9e9e] uppercase font-bold tracking-tighter">{t('miniCactpot.maxReturn')}</p>
                       <p className="text-sm font-mono font-bold text-white">
                         {line.maxPossible.toLocaleString()}
                       </p>
@@ -240,9 +242,9 @@ export default function MiniCactpot() {
           </div>
 
           <div className="bg-[#D39E47] rounded-3xl p-6 text-black">
-            <h3 className="font-bold mb-2">最佳策略提示</h3>
+<h3 className="font-bold mb-2">{t('miniCactpot.bestTip')}</h3>
             <p className="text-sm opacity-80 leading-relaxed">
-              優先尋找可能達成 1-2-3 (和為 6) 或 7-8-9 (和為 24) 的路線。如果已知數字中有 1 或 2，請關注與其相連的行、列或對角線。
+              {t('miniCactpot.priorityFind')} 1-2-3 ({t('miniCactpot.sum')} 6) {t('miniCactpot.or')} 7-8-9 ({t('miniCactpot.sum')} 24) {t('miniCactpot.lines')}. {t('miniCactpot.ifKnown')} 1 {t('miniCactpot.or')} 2 {t('miniCactpot.lookAtConnected')}
             </p>
           </div>
         </div>

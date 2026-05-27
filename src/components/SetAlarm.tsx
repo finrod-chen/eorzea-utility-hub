@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, Clock, Trash2, CalendarDays, CalendarRange, FileText, Anchor, Briefcase, Compass, Sword, ShieldCheck, Volume2 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 
 import { Alarm } from '../types';
 
@@ -10,17 +11,27 @@ interface SetAlarmProps {
   now: Date;
 }
 
+interface AlarmDef {
+  labelKey: string;   // i18n key for display
+  labelCn: string;    // Chinese label for includes() logic
+  isReset?: boolean;
+  duration?: number;
+  offsetMinutes?: number;
+  icon: React.ComponentType<{ size: number }>;
+  color: string;
+}
+
 export default function SetAlarm({ alarms, setAlarms, now }: SetAlarmProps) {
+  const { t } = useTranslation();
 
   const formatCountdown = (target: Date) => {
     const diff = target.getTime() - now.getTime();
-    if (diff <= 0) return '時間已到';
+    if (diff <= 0) return t('setAlarm.timeUp');
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    
-    return `${days > 0 ? days + '天 ' : ''}${hours}小時 ${minutes}分 ${seconds}秒`;
+    return `${days > 0 ? days + t('setAlarm.day') : ''}${hours}${t('setAlarm.hour')} ${minutes}${t('setAlarm.min')} ${seconds}${t('setAlarm.sec')}`;
   };
 
   const getDailyReset = () => {
@@ -62,67 +73,67 @@ export default function SetAlarm({ alarms, setAlarms, now }: SetAlarmProps) {
     return new Date(departure.getTime() - (8 * 60 * 60 * 1000));
   };
 
-  const toggleAlarm = (def: any) => {
-    const existing = alarms.find(a => a.label === def.label);
+  const toggleAlarm = (def: AlarmDef) => {
+    // Match by stable i18n key (new alarms) OR legacy Chinese label (backward compat).
+    const existing = alarms.find(a => a.label === def.labelKey || a.label === def.labelCn);
     if (existing) {
       setAlarms(prev => prev.filter(a => a.id !== existing.id));
     } else {
       let targetTime: Date;
       if (def.isReset) {
-        if (def.label.includes('每日')) targetTime = getDailyReset();
-        else if (def.label.includes('每週')) targetTime = getWeeklyReset();
-        else if (def.label.includes('理符')) targetTime = getLevequestReset();
-        else if (def.label.includes('出海')) targetTime = new Date(getOceanFishingDeparture().getTime() - (def.offsetMinutes || 0) * 60 * 1000);
+        if (def.labelKey.includes('dailyReset'))   targetTime = getDailyReset();
+        else if (def.labelKey.includes('weeklyReset')) targetTime = getWeeklyReset();
+        else if (def.labelKey.includes('gcSupply'))    targetTime = getLevequestReset();
+        else if (def.labelKey.includes('fishing'))     targetTime = new Date(getOceanFishingDeparture().getTime() - (def.offsetMinutes || 0) * 60 * 1000);
         else targetTime = new Date();
       } else {
-        // Correctly calculate target time from NOW for duration-based alarms
         targetTime = new Date(new Date().getTime() + (def.duration || 0) * 60 * 60 * 1000);
       }
-      setAlarms(prev => [...prev, { id: Math.random().toString(36), label: def.label, targetTime, active: true, isReset: !!def.isReset }]);
+      // Store the i18n key as the stable label — displayed via t(alarm.label).
+      setAlarms(prev => [...prev, { id: crypto.randomUUID(), label: def.labelKey, targetTime, active: true, isReset: !!def.isReset }]);
     }
   };
 
-  const alarmDefinitions = [
-    { label: '每日任務重設提醒', isReset: true, icon: CalendarDays, color: 'text-amber-500' },
-    { label: '每週任務重設提醒', isReset: true, icon: CalendarRange, color: 'text-rose-500' },
-    { label: '理符受理限額補充提醒', isReset: true, icon: FileText, color: 'text-sky-500' },
-    { label: '出海垂釣準備', isReset: true, icon: Anchor, color: 'text-indigo-500' },
-    { label: '雇員籌集委託', duration: 1, icon: Briefcase, color: 'text-emerald-500' },
-    { label: '雇員探索委託', duration: 18, icon: Compass, color: 'text-amber-500' },
-    { label: '雇員自由委託', duration: 1, icon: Briefcase, color: 'text-emerald-500' },
-    { label: '冒險者小隊訓練', duration: 1, icon: Sword, color: 'text-rose-500' },
-    { label: '冒險者小隊分隊任務', duration: 18, icon: ShieldCheck, color: 'text-sky-500' },
+  const alarmDefinitions: AlarmDef[] = [
+    { labelKey: 'setAlarm.dailyReset',  labelCn: '每日任務重設提醒',   isReset: true, icon: CalendarDays,   color: 'text-amber-500' },
+    { labelKey: 'setAlarm.weeklyReset', labelCn: '每週任務重設提醒',   isReset: true, icon: CalendarRange,  color: 'text-rose-500' },
+    { labelKey: 'setAlarm.gcSupply',    labelCn: '理符受理限額補充提醒', isReset: true, icon: FileText,      color: 'text-sky-500' },
+    { labelKey: 'setAlarm.fishingReady', labelCn: '出海垂釣準備',       isReset: true, icon: Anchor,        color: 'text-indigo-500' },
+    { labelKey: 'setAlarm.gathering',   labelCn: '雇員籌集委託',        duration: 1,  icon: Briefcase,     color: 'text-emerald-500' },
+    { labelKey: 'setAlarm.exploration', labelCn: '雇員探索委託',        duration: 18, icon: Compass,       color: 'text-amber-500' },
+    { labelKey: 'setAlarm.free',        labelCn: '雇員自由委託',        duration: 1,  icon: Briefcase,     color: 'text-emerald-500' },
+    { labelKey: 'setAlarm.squadTraining', labelCn: '冒險者小隊訓練',    duration: 1,  icon: Sword,         color: 'text-rose-500' },
+    { labelKey: 'setAlarm.squadMission', labelCn: '冒險者小隊分隊任務', duration: 18, icon: ShieldCheck,   color: 'text-sky-500' },
   ];
 
   const requestPermission = () => {
     if (typeof Notification !== 'undefined') {
       Notification.requestPermission().then(permission => {
         if (permission === 'granted') {
-          alert('通知權限已開啟！');
+          alert(t('setAlarm.notificationsOn'));
         } else {
-          alert('通知權限被拒絕，請在瀏覽器設定中手動開啟。');
+          alert(t('setAlarm.notificationsOff'));
         }
       });
     }
   };
 
   const testNotification = () => {
-    // Test browser notification
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-      new Notification('艾歐澤亞助手 - 測試通知', {
-        body: '這是一個測試通知，如果您看到這個，代表瀏覽器通知功能正常。',
+      new Notification(t('setAlarm.appName') + ' - ' + t('setAlarm.testNotification'), {
+        body: t('setAlarm.testMessage'),
         icon: '/logo.png'
       });
     } else {
-      alert('瀏覽器通知權限尚未開啟，或您的瀏覽器不支援。');
+      alert(t('setAlarm.browserNotSupported'));
     }
-
-    // Test sound
     try {
-      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+      const audio = new Audio('/audio/alarm.mp3');
       audio.volume = 0.5;
-      audio.play().catch(e => console.log('Audio play blocked:', e));
-    } catch (e) {}
+      audio.play().catch(() => {});
+    } catch {
+      // Audio playback blocked by browser — silent fail is acceptable
+    }
   };
 
   return (
@@ -130,42 +141,43 @@ export default function SetAlarm({ alarms, setAlarms, now }: SetAlarmProps) {
       <header className="space-y-4">
         <div className="flex items-center gap-3">
           <img src="/tools/SetAlarm.png" alt="" className="w-6 h-6 object-contain" referrerPolicy="no-referrer" />
-          <h2 className="text-sm font-bold uppercase tracking-[0.3em] text-[#D39E47]">Alarm Clock</h2>
+          <h2 className="text-sm font-bold uppercase tracking-[0.3em] text-[#D39E47]">{t('setAlarm.customAlarm')}</h2>
         </div>
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
           <div className="space-y-4">
             <h1 className="text-4xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
-              自訂 <span className="text-[#D39E47]">鬧鐘提醒</span>
+              {t('setAlarm.title1')} <span className="text-[#D39E47]">{t('setAlarm.title2')}</span>
             </h1>
             <p className="text-[#9e9e9e] max-w-2xl">
-              設定各類遊戲內提醒，確保不錯過任何冒險節奏。當計時到達時，將透過瀏覽器發送通知並播放提示音。
+              {t('setAlarm.subtitle')}
             </p>
           </div>
           <div className="flex gap-3">
-            <button 
+            <button
               onClick={requestPermission}
               className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold text-white transition-colors flex items-center gap-2"
             >
-              <Bell size={14} /> 請求通知權限
+              <Bell size={14} /> {t('setAlarm.enableNotifications')}
             </button>
-            <button 
+            <button
               onClick={testNotification}
               className="px-4 py-2 bg-[#D39E47]/10 hover:bg-[#D39E47]/20 border border-[#D39E47]/20 rounded-xl text-xs font-bold text-[#D39E47] transition-colors flex items-center gap-2"
             >
-              <Volume2 size={14} /> 測試提醒功能
+              <Volume2 size={14} /> {t('setAlarm.testNotification')}
             </button>
           </div>
         </div>
         <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
           <p className="text-xs text-amber-200 leading-relaxed">
-            <span className="font-bold">提示：</span> 如果您在 iframe 中使用本工具，瀏覽器可能會封鎖通知。建議點擊右上角「在新分頁開啟」以獲得最佳提醒體驗。
+            <span className="font-bold">{t('setAlarm.infoTitle')}：</span> {t('setAlarm.browserNotSupported')}
           </p>
         </div>
       </header>
 
       <div className="space-y-2">
         {alarmDefinitions.map((def, i) => {
-          const alarm = alarms.find(a => a.label === def.label);
+          // Match by stable i18n key (new) or legacy Chinese label (backward compat).
+          const alarm = alarms.find(a => a.label === def.labelKey || a.label === def.labelCn);
           return (
             <div key={i} className="bg-[#1a1a1a] border border-white/5 rounded-xl p-4 flex items-center justify-between hover:border-white/10 transition-colors">
               <div className="flex items-center gap-4">
@@ -173,7 +185,7 @@ export default function SetAlarm({ alarms, setAlarms, now }: SetAlarmProps) {
                   <def.icon size={20} />
                 </div>
                 <div className="flex flex-col">
-                  <h4 className="font-bold text-white">{def.label}</h4>
+                  <h4 className="font-bold text-white">{t(def.labelKey)}</h4>
                   <span className="text-sm font-mono text-[#9e9e9e] md:hidden">
                     {alarm?.active ? formatCountdown(alarm.targetTime) : '--:--:--'}
                   </span>
@@ -183,7 +195,7 @@ export default function SetAlarm({ alarms, setAlarms, now }: SetAlarmProps) {
                 <span className="text-sm font-mono text-[#9e9e9e] hidden md:block">
                   {alarm?.active ? formatCountdown(alarm.targetTime) : '--:--:--'}
                 </span>
-                <button 
+                <button
                   onClick={() => toggleAlarm(def)}
                   className={`w-12 h-6 rounded-full transition-colors relative ${alarm?.active ? 'bg-emerald-500' : 'bg-gray-600'}`}
                 >

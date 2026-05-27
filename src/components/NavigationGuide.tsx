@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { 
   CheckSquare, 
   CloudSun, 
@@ -14,177 +15,177 @@ import {
   Map as MapIcon,
   Bell,
   Calendar,
-  Layers
+  Layers 
 } from 'lucide-react';
 
 const guideItems = [
   {
     id: 'alarm',
-    label: '自訂鬧鐘 (Alarm Clock)',
+    labelEn: 'Alarm Clock',
     icon: Bell,
     image: '/tools/SetAlarm.png',
     color: 'text-amber-500',
     bg: 'bg-amber-500/10',
-    desc: '設定各類遊戲內提醒，確保不錯過任何冒險節奏。當計時到達時，將透過瀏覽器發送通知。',
-    tips: [
-      '支援每日、每週重設任務提醒。',
-      '支援倒數計時功能，適用於雇員委託或小隊訓練。',
-      '鬧鐘設定會自動儲存，重新整理頁面也不會遺失。'
+    descEn: 'Set various in-game reminders. Browser notifications fire when timers are up.',
+    tipsEn: [
+      'Supports daily & weekly reset reminders.',
+      'Countdown timers for Levequests or squad training.',
+      'Alarm settings auto-save — they survive page refresh.',
     ]
   },
   {
     id: 'event-calendar',
-    label: '活動行事曆 (Event Calendar)',
+    labelEn: 'Event Calendar',
     icon: Calendar,
     image: '/tools/EventCalendar.png',
     color: 'text-rose-500',
     bg: 'bg-rose-500/10',
-    desc: '管理 FC 或固定團的活動排程，並同步整合官方活動資訊。您可以新增、編輯或刪除個人行程，並在首頁快速查看接下來的行程。',
-    tips: [
-      '官方活動標記為藍色「OFFICIAL」，並提供外部連結圖示。',
-      '實作快取機制，每 60 分鐘重新抓取一次官方資料。',
-      '在首頁會顯示接下來的 3 個活動。',
-      '資料會儲存在瀏覽器中，不會遺失。'
+    descEn: 'Manage FC/party schedules with auto-synced official event data. Add, edit, or delete personal events.',
+    tipsEn: [
+      'Official events marked in blue "OFFICIAL" with external link icon.',
+      'Client-side cache refreshes every 60 minutes.',
+      'Shows next 3 upcoming events on the dashboard.',
+      'Data stored in browser — persists across sessions.',
     ]
   },
   {
     id: 'checklist',
-    label: '任務進度 (Duty Checklist)',
+    labelEn: 'Duty Checklist',
     icon: CheckSquare,
     image: '/tools/DutyChecklist.png',
     color: 'text-emerald-500',
     bg: 'bg-emerald-500/10',
-    desc: '追蹤每日與每週任務。點擊任務即可標記完成，系統會自動記錄完成時間。',
-    tips: [
-      '每日任務於台灣時間 23:00 重置。',
-      '每週任務於每週二 16:00 重置。',
-      '完成所有任務後，頂部會顯示最終達成時間。'
+    descEn: 'Track daily & weekly tasks. Tap to mark complete; completion time is auto-logged.',
+    tipsEn: [
+      'Daily tasks reset at 23:00 (TW time).',
+      'Weekly tasks reset every Tuesday at 16:00.',
+      'Final completion timestamp shown when all tasks are done.',
     ]
   },
   {
     id: 'treasure',
-    label: '藏寶搜尋 (Treasure Hunt)',
+    labelEn: 'Treasure Hunt',
     icon: MapIcon,
     image: '/tools/TreasureHunt.png',
     color: 'text-amber-500',
     bg: 'bg-amber-500/10',
-    desc: '查詢各類藏寶圖的挖掘點與獎勵資訊。',
-    tips: [
-      '選擇對應的藏寶圖等級。',
-      '地圖會標示出該等級藏寶圖的可能挖掘點。',
-      '點擊地圖即可查看詳細座標。'
+    descEn: 'Look up excavation points and rewards for all treasure map types.',
+    tipsEn: [
+      'Select the corresponding treasure map tier.',
+      'Map highlights possible excavation points for that tier.',
+      'Tap the map to see precise coordinates.',
     ]
   },
   {
     id: 'market',
-    label: '市場查詢 (Market Board)',
+    labelEn: 'Market Board',
     icon: ShoppingCart,
     image: '/tools/MarketBoard.png',
     color: 'text-rose-500',
     bg: 'bg-rose-500/10',
-    desc: '整合 Universalis API，即時查詢各伺服器道具售價與交易紀錄。支援跨伺服器價格對比。',
-    tips: [
-      '搜尋功能支援「中文/英文」道具名稱查詢。',
-      '滑鼠懸停在道具名稱上可顯示 Cafekit 懸浮窗，查看詳細屬性。',
-      '可以選擇特定伺服器或整個大區 (Data Center) 進行查詢。',
-      '數據更新頻率取決於玩家上傳至 Universalis 的情況。'
+    descEn: 'Universalis API integration. Real-time pricing & transaction history across servers.',
+    tipsEn: [
+      'Search supports both Chinese and English item names.',
+      'Hover over item names to see Cafekit tooltips with full stats.',
+      'Query by specific server or entire Data Center.',
+      'Data refresh rate depends on player uploads to Universalis.',
     ]
   },
   {
     id: 'weather',
-    label: '天氣預報 (Skywatcher)',
+    labelEn: 'Skywatcher',
     icon: CloudSun,
     image: '/tools/Skywatcher.png',
     color: 'text-[#00B0FF]',
     bg: 'bg-[#00B0FF]/10',
-    desc: '查詢艾歐澤亞各地的天氣變換。支援稀有天氣篩選，是狩獵與探索筆記的好幫手。',
-    tips: [
-      '天氣每 8 小時（艾歐澤亞時間）變換一次。',
-      '變換點分別為 ET 0:00, 8:00, 16:00。',
-      '可以使用篩選功能快速找出「雨天」或「雷雨」等特定天氣。'
+    descEn: 'Query Eorzea weather across all regions. Rare weather filter available.',
+    tipsEn: [
+      'Weather changes every 8 hours (Eorzea Time).',
+      'Change points are ET 0:00, 8:00, and 16:00.',
+      'Use the filter to quickly find specific weather like Rain or Thunder.',
     ]
   },
   {
     id: 'interactive-maps',
-    label: '互動地圖 (Interactive Maps)',
+    labelEn: 'Interactive Maps',
     icon: MapIcon,
     image: '/tools/InteractiveMaps.png',
     color: 'text-blue-500',
     bg: 'bg-blue-500/10',
-    desc: '探索艾歐澤亞的地理資訊，查看各區域的資源與標記。整合 FFCafe 肥肥咖啡的互動地圖工具。',
-    tips: [
-      '支援縮放與拖拽，點擊標記可查看詳細資訊。',
-      '資料來源由 FFCafe 肥肥咖啡提供。'
+    descEn: 'Explore Eorzea geography. Resource nodes & markers. Powered by FFCafe.',
+    tipsEn: [
+      'Pinch to zoom and drag to pan. Tap markers for details.',
+      'Data provided by FFCafe 肥肥咖啡.',
     ]
   },
   {
     id: 'cactpot',
-    label: '仙人微彩 (Mini Cactpot)',
+    labelEn: 'Mini Cactpot',
     icon: Grid3X3,
     image: '/tools/MiniCactpot.png',
     color: 'text-amber-500',
     bg: 'bg-amber-500/10',
-    desc: '金碟遊樂場的刮刮樂輔助工具。輸入已知的數字，系統會計算每一條線的期望值。',
-    tips: [
-      '優先選擇期望值最高的路線。',
-      '通常 1-2-3 (6) 或 7-8-9 (24) 是最高獎勵的組合。',
-      '點擊格子即可輸入數字。'
+    descEn: 'Gold Saucer scratch-off assistant. Input known numbers to calculate expected values.',
+    tipsEn: [
+      'Prioritize routes with the highest expected value.',
+      '1-2-3 (sum=6) and 7-8-9 (sum=24) are typically the top prizes.',
+      'Tap a cell to enter a number.',
     ]
   },
   {
     id: 'tails',
-    label: '庫洛天書 (Wondrous Tails)',
+    labelEn: 'Wondrous Tails',
     icon: BookOpen,
     image: '/tools/WondrousTails.png',
     color: 'text-blue-500',
     bg: 'bg-blue-500/10',
-    desc: '模擬庫洛天書的貼紙連線機率。幫助你判斷是否該使用「重洗」點數。',
-    tips: [
-      '輸入當前貼紙位置，查看 1/2/3 連線的機率。',
-      '在 7 張貼紙時使用重洗通常是最佳策略。',
-      '視覺化顯示所有可能的連線路徑。'
+    descEn: 'Simulate Wondrous Tails sticker-line probabilities. Helps decide when to use rerolls.',
+    tipsEn: [
+      'Enter current sticker positions to see 1/2/3-line probabilities.',
+      'Rerolling at 7 stickers is usually the optimal strategy.',
+      'Visual display of all possible line paths.',
     ]
   },
   {
     id: 'chocobo',
-    label: '陸行鳥染色 (Chocobo Color)',
+    labelEn: 'Chocobo Color',
     icon: Bird,
     image: '/tools/ChocoboColor.png',
     color: 'text-amber-600',
     bg: 'bg-amber-600/10',
-    desc: '計算陸行鳥從當前顏色變更為目標顏色所需的水果數量。',
-    tips: [
-      '選擇當前顏色與目標顏色。',
-      '系統會計算出最精確的餵食清單。',
-      '請依照清單順序交叉餵食，以獲得最佳效果。'
+    descEn: 'Calculate how many fruits to retime your chocobo from current to target color.',
+    tipsEn: [
+      'Select your current color and target color.',
+      'System calculates the precise feeding sequence.',
+      'Alternate fruits in the suggested order for best results.',
     ]
   },
   {
     id: 'sightseeing',
-    label: '探索筆記 (Sightseeing Log)',
+    labelEn: 'Sightseeing Log',
     icon: Clock,
     image: '/tools/SightseeingLog.png',
     color: 'text-blue-600',
     bg: 'bg-blue-600/10',
-    desc: '整合時間與天氣條件，提示當前哪些探索筆記目標可以完成。',
-    tips: [
-      '列表會根據當前 ET 時間自動排序。',
-      '標註了每個目標所需的特定表情動作。',
-      '結合天氣預報功能，提前規劃行程。'
+    descEn: 'Cross-reference time & weather to show which sightseeing log targets are currently achievable.',
+    tipsEn: [
+      'List auto-sorts by current ET time.',
+      'Each target notes the required emote.',
+      'Combine with Skywatcher to plan ahead.',
     ]
   },
   {
     id: 'links',
-    label: '好用連結 (Useful Links)',
+    labelEn: 'Useful Links',
     icon: ExternalLink,
     image: '/tools/UsefulLinks.png',
     color: 'text-slate-500',
     bg: 'bg-slate-500/10',
-    desc: '整理各類實用的影片與文字站點，包含官方資訊、攻略、幻化與裝修等優質網站。',
-    tips: [
-      '分類整理了影片與文字資源，方便快速查找。',
-      '包含繁中官方、高難攻略、幻化搭配與房屋裝修等類別。',
-      '點擊連結會在新分頁開啟。'
+    descEn: 'Curated video & text resources: official info, guides, glam & housing sites.',
+    tipsEn: [
+      'Categorized video and text resources for quick lookup.',
+      'Covers TW official, savage guides, glam builds, and housing decor.',
+      'Links open in a new tab.',
     ]
   }
 ];
@@ -194,10 +195,16 @@ interface NavigationGuideProps {
 }
 
 export default function NavigationGuide({ onViewChange }: NavigationGuideProps) {
+  const { t } = useTranslation();
+
   const handleViewChange = (view: any) => {
     onViewChange?.(view);
     const main = document.getElementById('main-content');
     if (main) main.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const getLocalizedTips = (tipsEn: string[]) => {
+    return tipsEn;
   };
 
   return (
@@ -208,11 +215,10 @@ export default function NavigationGuide({ onViewChange }: NavigationGuideProps) 
           <span className="text-sm font-bold uppercase tracking-[0.3em] text-[#D39E47]">Guide</span>
         </div>
         <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight">
-          導覽輔助 <span className="text-[#D39E47]">使用指南</span>
+          {t('navigationGuide.title')} <span className="text-[#D39E47]">{t('navigationGuide.subtitle')}</span>
         </h1>
         <p className="text-[#9e9e9e] max-w-2xl leading-relaxed">
-          歡迎使用艾歐澤亞助手。本工具旨在協助冒險者更輕鬆地處理日常事務。
-          下方詳細介紹了各項工具的功能與使用小技巧。
+          {t('navigationGuide.description')}
         </p>
       </header>
 
@@ -234,7 +240,7 @@ export default function NavigationGuide({ onViewChange }: NavigationGuideProps) 
               </button>
               <div className="flex gap-2">
                 <div className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold text-[#D39E47] uppercase tracking-widest">
-                  Tool Guide
+                  {t('navigationGuide.toolGuide')}
                 </div>
               </div>
             </div>
@@ -243,23 +249,23 @@ export default function NavigationGuide({ onViewChange }: NavigationGuideProps) 
               onClick={() => handleViewChange(item.id)}
               className="text-left group/title"
             >
-              <h3 className="text-xl font-bold text-white mb-3 group-hover/title:text-[#D39E47] transition-colors">{item.label}</h3>
+              <h3 className="text-xl font-bold text-white mb-3 group-hover/title:text-[#D39E47] transition-colors">{item.labelEn}</h3>
             </button>
             <p className="text-sm text-[#9e9e9e] leading-relaxed mb-4">
-              {item.desc}
+              {item.descEn}
             </p>
             <div className="flex items-center gap-1.5 text-[10px] text-[#D39E47] font-bold uppercase tracking-wider mb-6 opacity-50 group-hover:opacity-100 transition-opacity">
               <ExternalLink size={10} />
-              點擊工具名稱或圖示可連結至該工具
+              {t('navigationGuide.tips')}
             </div>
 
-            <div className="space-y-3 pt-6 border-t border-white/5">
-              <div className="flex items-center gap-2 text-xs font-bold text-white uppercase tracking-wider">
-                <Info size={14} className="text-[#D39E47]" />
-                使用小技巧
-              </div>
+              <div className="space-y-3 pt-6 border-t border-white/5">
+                <div className="flex items-center gap-2 text-xs font-bold text-white uppercase tracking-wider">
+                  <Info size={14} className="text-[#D39E47]" />
+                  {t('navigationGuide.tips')}
+                </div>
               <ul className="space-y-2">
-                {item.tips.map((tip, i) => (
+                {getLocalizedTips(item.tipsEn).map((tip, i) => (
                   <li key={i} className="flex items-start gap-2 text-xs text-[#9e9e9e] leading-relaxed">
                     <span className={`w-1.5 h-1.5 rounded-full ${item.color.replace('text-', 'bg-')} mt-1.5 shrink-0`} />
                     {tip}

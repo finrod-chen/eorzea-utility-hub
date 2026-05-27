@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, MapPin, TrendingUp, History, ExternalLink, Loader2, AlertCircle, ShoppingCart, Globe, Star, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import itemsIndex from '../data/items-index.json';
 
 interface MarketItem {
@@ -32,7 +33,7 @@ interface Listing {
   pricePerUnit: number;
   quantity: number;
   total: number;
-  retainerName: number;
+  retainerName: string;
   retainerCity: number;
   creatorName: string;
   hq: boolean;
@@ -100,6 +101,7 @@ declare global {
 }
 
 export default function MarketBoard() {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDC, setSelectedDC] = useState('繁中服 (陸行鳥)');
   const [selectedWorld, setSelectedWorld] = useState('');
@@ -164,9 +166,9 @@ export default function MarketBoard() {
   };
 
   const getItemId = (item: any) => item?.ID || item?.id;
-  const getItemName = (item: any) => item?.Name || item?.name || '未知道具';
+  const getItemName = (item: any) => item?.Name || item?.name || t('marketBoard.unknownItem');
   const getItemIcon = (item: any) => item?.Icon || item?.icon || '';
-  const getItemKind = (item: any) => item?.ItemKind?.Name || item?.item_kind?.name || '道具';
+  const getItemKind = (item: any) => item?.ItemKind?.Name || item?.item_kind?.name || t('marketBoard.item');
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -235,7 +237,7 @@ export default function MarketBoard() {
             const itemData = await response.json();
             const item = { 
               ID: itemData.ID, 
-              Name: itemData.Name || `道具 ${itemId}`, 
+              Name: itemData.Name || `${t('marketBoard.item')} ${itemId}`, 
               Icon: itemData.Icon, 
               ItemKind: itemData.ItemKind,
               ItemSearchCategory: itemData.ItemSearchCategory
@@ -249,7 +251,7 @@ export default function MarketBoard() {
           console.error('XIVAPI ID fetch failed', err);
         }
         // Fallback for ID if XIVAPI fails
-        const mockItem: SearchResult = { ID: itemId, Name: `道具 ID: ${term}`, Icon: '/i/000000/000001.png', ItemKind: { Name: '未知' } };
+        const mockItem: SearchResult = { ID: itemId, Name: `${t('marketBoard.item')} ID: ${term}`, Icon: '/i/000000/000001.png', ItemKind: { Name: t('marketBoard.unknownItem') } };
         setSearchResults([mockItem]);
         fetchMarketData(mockItem);
         setIsSearching(false);
@@ -294,10 +296,10 @@ export default function MarketBoard() {
       setSearchResults(results);
       
       if (results.length === 0) {
-        setError('找不到相符的物品，請嘗試輸入更精確的關鍵字（支援中/英文或道具 ID）。');
+        setError(t('marketBoard.noResults'));
       }
     } catch (err) {
-      setError(`搜尋物品時發生錯誤: ${err instanceof Error ? err.message : '未知錯誤'}`);
+      setError(t('marketBoard.searchError', { error: err instanceof Error ? err.message : t('marketBoard.unknownItem') }));
     } finally {
       setIsSearching(false);
     }
@@ -336,10 +338,10 @@ export default function MarketBoard() {
         const response = await fetch(url);
         if (!response.ok) {
           if (response.status === 404) {
-            lastError = '找不到數據';
+            lastError = t('marketBoard.noData');
             continue;
           }
-          throw new Error(`API 回應異常 (${response.status})`);
+          throw new Error(t('marketBoard.apiError', { status: response.status }));
         }
         
         const data = await response.json();
@@ -353,11 +355,11 @@ export default function MarketBoard() {
           console.log(`Successfully fetched data from ${location}`);
           break;
         } else {
-          lastError = '尚無交易紀錄';
+          lastError = t('marketBoard.noHistory');
         }
       } catch (err) {
         console.warn(`Failed to fetch from ${location}:`, err);
-        lastError = err instanceof Error ? err.message : '未知錯誤';
+        lastError = err instanceof Error ? err.message : t('marketBoard.noData');
       }
     }
 
@@ -365,9 +367,9 @@ export default function MarketBoard() {
       if (!successData) {
         const isMarketable = item.ItemSearchCategory !== null && item.ItemSearchCategory !== undefined;
         if (!isMarketable) {
-          throw new Error('此物品不可交易（無法在市場板上架）。');
+          throw new Error(t('marketBoard.noTradesRecord'));
         }
-        throw new Error(`該物品目前在市場上找不到數據。這通常是因為該物品較冷門，或在您選擇的區域尚未有玩家上傳行情。 (最後嘗試錯誤: ${lastError})`);
+        throw new Error(t('marketBoard.noDataExplanation') + ` (${t('marketBoard.noData')}: ${lastError})`);
       }
 
       // Ensure basic price fields exist for the UI
@@ -378,7 +380,7 @@ export default function MarketBoard() {
       setMarketData(marketInfo);
     } catch (err) {
       console.error('Final market fetch error:', err);
-      setError(err instanceof Error ? err.message : '獲取市場數據失敗');
+      setError(err instanceof Error ? err.message : t('marketBoard.error'));
     } finally {
       setIsLoadingData(false);
     }
@@ -391,7 +393,7 @@ export default function MarketBoard() {
   const getTimeAgo = (timestamp: number) => {
     const diff = Date.now() - timestamp * 1000;
     const hours = Math.floor(Math.max(0, diff / (1000 * 60 * 60)));
-    return `${hours} 小時前`;
+    return t('marketBoard.hoursAgo', { hours });
   };
 
   return (
@@ -402,10 +404,10 @@ export default function MarketBoard() {
           <h2 className="text-sm font-bold uppercase tracking-[0.3em] text-[#D39E47]">Market Board</h2>
         </div>
         <h1 className="text-4xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
-          市場價格 <span className="text-[#D39E47]">快速查詢</span>
+          {t('marketBoard.title')} <span className="text-[#D39E47]">{t('marketBoard.subtitle')}</span>
         </h1>
         <p className="text-[#9e9e9e] max-w-2xl">
-          整合 Universalis API，即時查詢各伺服器道具售價與交易紀錄。支援跨伺服器價格對比，助您找到最划算的交易。
+          {t('marketBoard.description')}
         </p>
       </header>
 
@@ -415,7 +417,7 @@ export default function MarketBoard() {
           <div className="bg-[#1a1a1a] border border-white/5 rounded-3xl p-6 space-y-6">
             <div className="space-y-4">
               <label className="text-xs font-bold text-[#9e9e9e] uppercase tracking-widest flex items-center gap-2">
-                <Globe size={14} className="text-[#D39E47]" /> 選擇區域 / 伺服器
+                <Globe size={14} className="text-[#D39E47]" /> {t('marketBoard.serverSelector')}
               </label>
               <div className="grid grid-cols-2 gap-2">
                 <select 
@@ -435,7 +437,7 @@ export default function MarketBoard() {
                     onChange={(e) => setSelectedWorld(e.target.value)}
                     className="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:border-[#D39E47] outline-none transition-colors"
                   >
-                    <option value="">全區 (DC)</option>
+                    <option value="">{t('marketBoard.allDc')}</option>
                     {DATA_CENTERS.find(dc => dc.name === selectedDC)?.servers.map(server => (
                       <option key={server.name} value={server.name}>{server.name}</option>
                     ))}
@@ -446,7 +448,7 @@ export default function MarketBoard() {
             {favorites.length > 0 && (
               <div className="space-y-3 pb-6 border-b border-white/5">
                 <p className="text-[10px] text-[#9e9e9e] uppercase font-bold tracking-widest flex items-center gap-2">
-                  <Star size={10} className="text-amber-500 fill-amber-500" /> 最愛清單
+                  <Star size={10} className="text-amber-500 fill-amber-500" /> {t('marketBoard.favorites')}
                 </p>
                 <div className="grid grid-cols-1 gap-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
                   {favorites.map((item) => (
@@ -466,7 +468,7 @@ export default function MarketBoard() {
                       <button
                         onClick={() => toggleFavorite(item)}
                         className="p-2 text-[#9e9e9e] hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all opacity-0 group-hover:opacity-100"
-                        title="移除"
+                        title={t('marketBoard.remove')}
                       >
                         <Trash2 size={14} />
                       </button>
@@ -478,14 +480,14 @@ export default function MarketBoard() {
 
             <form onSubmit={handleSearch} className="space-y-4">
               <label className="text-xs font-bold text-[#9e9e9e] uppercase tracking-widest flex items-center gap-2">
-                <Search size={14} className="text-[#D39E47]" /> 搜尋道具 (支援中/英文)
+                <Search size={14} className="text-[#D39E47]" /> {t('marketBoard.searchPlaceholder')}
               </label>
               <div className="relative">
                 <input 
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="例如: 鐵礦, Iron Ore..."
+                  placeholder={t('marketBoard.searchExample')}
                   className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:border-[#D39E47] outline-none transition-colors"
                 />
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9e9e9e]" size={18} />
@@ -495,12 +497,12 @@ export default function MarketBoard() {
                 disabled={isSearching}
                 className="w-full py-3 bg-[#D39E47] hover:bg-[#B88A3E] disabled:bg-[#D39E47]/50 text-black font-bold rounded-xl transition-all flex items-center justify-center gap-2"
               >
-                {isSearching ? <Loader2 className="animate-spin" size={18} /> : '開始搜尋'}
-              </button>
-            </form>
+                  {isSearching ? <Loader2 className="animate-spin" size={18} /> : t('marketBoard.searchButton')}
+                </button>
+              </form>
 
             <div className="space-y-3">
-              <p className="text-[10px] text-[#9e9e9e] uppercase font-bold tracking-widest">搜尋結果</p>
+              <p className="text-[10px] text-[#9e9e9e] uppercase font-bold tracking-widest">{t('marketBoard.results')}</p>
               <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                 {searchResults.map((item) => (
                   <div
@@ -519,7 +521,7 @@ export default function MarketBoard() {
                         <div className="flex items-center gap-2">
                           <p className="text-[10px] text-[#9e9e9e] truncate">{getItemKind(item)}</p>
                           {item.ItemSearchCategory === null && (
-                            <span className="text-[9px] px-1 bg-red-500/10 text-red-500 rounded border border-red-500/20">不可交易</span>
+                            <span className="text-[9px] px-1 bg-red-500/10 text-red-500 rounded border border-red-500/20">{t('marketBoard.untradeable')}</span>
                           )}
                         </div>
                       </div>
@@ -538,7 +540,7 @@ export default function MarketBoard() {
                 {searchResults.length === 0 && !isSearching && (
                   <div className="text-center py-10 text-[#9e9e9e]">
                     <Search size={32} className="mx-auto mb-2 opacity-20" />
-                    <p className="text-xs">輸入道具名稱開始查詢</p>
+                    <p className="text-xs">{t('marketBoard.searchPrompt')}</p>
                   </div>
                 )}
               </div>
@@ -550,13 +552,13 @@ export default function MarketBoard() {
         <div className="lg:col-span-2 space-y-6">
           <AnimatePresence mode="wait">
             {isLoadingData ? (
-              <motion.div 
+              <motion.div
                 key="loading"
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 className="bg-[#1a1a1a] border border-white/5 rounded-3xl p-20 flex flex-col items-center justify-center text-center"
               >
                 <Loader2 className="animate-spin text-[#D39E47] mb-4" size={48} />
-                <p className="text-[#9e9e9e]">正在從 Universalis 獲取即時數據...</p>
+                <p className="text-[#9e9e9e]">{t('marketBoard.fetchingData')}</p>
               </motion.div>
             ) : error ? (
               <motion.div 
@@ -565,7 +567,7 @@ export default function MarketBoard() {
                 className="bg-[#1a1a1a] border border-red-500/20 rounded-3xl p-20 flex flex-col items-center justify-center text-center"
               >
                 <AlertCircle className="text-red-500 mb-4" size={48} />
-                <p className="text-white font-bold mb-2">發生錯誤</p>
+                <p className="text-white font-bold mb-2">{t('marketBoard.error')}</p>
                 <p className="text-[#9e9e9e] text-sm">{error}</p>
               </motion.div>
             ) : marketData && selectedItem ? (
@@ -588,7 +590,7 @@ export default function MarketBoard() {
                       <button
                         onClick={() => toggleFavorite(selectedItem)}
                         className={`p-2 rounded-lg transition-all ${isFavorite(getItemId(selectedItem)) ? 'text-amber-500 bg-amber-500/10' : 'text-[#9e9e9e] hover:text-white hover:bg-white/5'}`}
-                        title={isFavorite(getItemId(selectedItem)) ? '從最愛移除' : '加入最愛'}
+                        title={isFavorite(getItemId(selectedItem)) ? t('marketBoard.removeFromFavorites') : t('marketBoard.addToFavorites')}
                       >
                         <Star size={20} fill={isFavorite(getItemId(selectedItem)) ? 'currentColor' : 'none'} />
                       </button>
@@ -602,11 +604,11 @@ export default function MarketBoard() {
                   </div>
                   <div className="grid grid-cols-2 gap-4 w-full md:w-auto">
                     <div className="bg-black/20 rounded-2xl p-4 text-center">
-                      <p className="text-[10px] text-[#9e9e9e] uppercase font-bold mb-1">最低售價</p>
+                      <p className="text-[10px] text-[#9e9e9e] uppercase font-bold mb-1">{t('marketBoard.lowestPrice')}</p>
                       <p className="text-xl font-mono font-bold text-[#D39E47]">{formatPrice(marketData.minPrice)}</p>
                     </div>
                     <div className="bg-black/20 rounded-2xl p-4 text-center">
-                      <p className="text-[10px] text-[#9e9e9e] uppercase font-bold mb-1">平均售價</p>
+                      <p className="text-[10px] text-[#9e9e9e] uppercase font-bold mb-1">{t('marketBoard.avgPrice')}</p>
                       <p className="text-xl font-mono font-bold text-white">{formatPrice(Math.round(marketData.currentAveragePrice))}</p>
                     </div>
                   </div>
@@ -617,19 +619,19 @@ export default function MarketBoard() {
                   <div className="bg-[#1a1a1a] border border-white/5 rounded-3xl overflow-hidden">
                     <div className="p-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
                       <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                        <ShoppingCart size={16} className="text-[#D39E47]" /> 目前上架
+                        <ShoppingCart size={16} className="text-[#D39E47]" /> {t('marketBoard.currentListings')}
                       </h3>
-                      <span className="text-[10px] text-[#9e9e9e]">前 10 筆</span>
+                      <span className="text-[10px] text-[#9e9e9e]">{t('marketBoard.top10')}</span>
                     </div>
                     <div className="overflow-x-auto">
                       {marketData.listings && marketData.listings.length > 0 ? (
                         <table className="w-full text-left text-xs">
                           <thead>
                             <tr className="text-[#9e9e9e] border-b border-white/5">
-                              <th className="px-4 py-3 font-medium">價格</th>
-                              <th className="px-4 py-3 font-medium">數量</th>
-                              <th className="px-4 py-3 font-medium">總計</th>
-                              <th className="px-4 py-3 font-medium">伺服器</th>
+                              <th className="px-4 py-3 font-medium">{t('marketBoard.price')}</th>
+                              <th className="px-4 py-3 font-medium">{t('marketBoard.qty')}</th>
+                              <th className="px-4 py-3 font-medium">{t('marketBoard.total')}</th>
+                              <th className="px-4 py-3 font-medium">{t('marketBoard.server')}</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-white/5">
@@ -648,7 +650,7 @@ export default function MarketBoard() {
                         </table>
                       ) : (
                         <div className="p-12 text-center">
-                          <p className="text-[#9e9e9e] text-xs italic">目前無詳細掛售資料，僅提供上方區域彙整摘要。</p>
+                          <p className="text-[#9e9e9e] text-xs italic">{t('marketBoard.noListings')}</p>
                         </div>
                       )}
                     </div>
@@ -658,19 +660,19 @@ export default function MarketBoard() {
                   <div className="bg-[#1a1a1a] border border-white/5 rounded-3xl overflow-hidden">
                     <div className="p-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
                       <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                        <TrendingUp size={16} className="text-[#00B0FF]" /> 最近交易
+                        <TrendingUp size={16} className="text-[#00B0FF]" /> {t('marketBoard.recentSales')}
                       </h3>
-                      <span className="text-[10px] text-[#9e9e9e]">前 10 筆</span>
+                      <span className="text-[10px] text-[#9e9e9e]">{t('marketBoard.top10')}</span>
                     </div>
                     <div className="overflow-x-auto">
                       {marketData.recentHistory && marketData.recentHistory.length > 0 ? (
                         <table className="w-full text-left text-xs">
                           <thead>
                             <tr className="text-[#9e9e9e] border-b border-white/5">
-                              <th className="px-4 py-3 font-medium">價格</th>
-                              <th className="px-4 py-3 font-medium">數量</th>
-                              <th className="px-4 py-3 font-medium">日期</th>
-                              <th className="px-4 py-3 font-medium">伺服器</th>
+                              <th className="px-4 py-3 font-medium">{t('marketBoard.price')}</th>
+                              <th className="px-4 py-3 font-medium">{t('marketBoard.qty')}</th>
+                              <th className="px-4 py-3 font-medium">{t('marketBoard.date')}</th>
+                              <th className="px-4 py-3 font-medium">{t('marketBoard.server')}</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-white/5">
@@ -689,7 +691,7 @@ export default function MarketBoard() {
                         </table>
                       ) : (
                         <div className="p-12 text-center">
-                          <p className="text-[#9e9e9e] text-xs italic">目前無詳細歷史成交紀錄。</p>
+                          <p className="text-[#9e9e9e] text-xs italic">{t('marketBoard.noHistory')}</p>
                         </div>
                       )}
                     </div>
@@ -703,7 +705,7 @@ export default function MarketBoard() {
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 text-xs text-[#D39E47] hover:underline"
                   >
-                    在 Universalis 查看完整數據 <ExternalLink size={12} />
+                    {t('marketBoard.viewFull')} <ExternalLink size={12} />
                   </a>
                 </div>
               </motion.div>
@@ -716,9 +718,9 @@ export default function MarketBoard() {
                 <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">
                   <ShoppingCart className="text-[#9e9e9e] opacity-20" size={40} />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">準備好開始查詢了嗎？</h3>
+                <h3 className="text-xl font-bold text-white mb-2">{t('marketBoard.readyToSearch')}</h3>
                 <p className="text-[#9e9e9e] text-sm max-w-xs">
-                  在左側搜尋框輸入道具名稱，並選擇您所在的伺服器或大區。
+                  {t('marketBoard.searchPrompt')}
                 </p>
               </motion.div>
             )}
@@ -728,7 +730,7 @@ export default function MarketBoard() {
 
       <footer className="p-6 bg-amber-500/5 border border-amber-500/10 rounded-3xl">
         <p className="text-[11px] text-[#9e9e9e] leading-relaxed">
-          <span className="text-[#D39E47] font-bold">數據說明：</span> 市場數據由 <a href="https://universalis.app/" target="_blank" rel="noopener noreferrer" className="underline">Universalis</a> 提供，數據更新頻率取決於玩家的上傳情況。搜尋功能由 <a href="https://xivapi.com/" target="_blank" rel="noopener noreferrer" className="underline">XIVAPI</a> 與 <a href="https://cafemaker.wakingsands.com/" target="_blank" rel="noopener noreferrer" className="underline">Cafemaker</a> 支援。支援<span className="text-white font-bold">中/英文道具名稱</span>搜尋。
+          <span className="text-[#D39E47] font-bold">{t('marketBoard.dataNote')}:</span> <a href="https://universalis.app/" target="_blank" rel="noopener noreferrer" className="underline">Universalis</a>, {t('marketBoard.dataUpdateFreq')} {t('marketBoard.searchBy')} <a href="https://xivapi.com/" target="_blank" rel="noopener noreferrer" className="underline">XIVAPI</a>. <span className="text-white font-bold">{t('marketBoard.supportsEnCn')}</span>.
         </p>
       </footer>
     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Calendar, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 
 interface ResetCountdownProps {
   dailyProgress?: { done: number; total: number };
@@ -8,6 +9,7 @@ interface ResetCountdownProps {
 }
 
 export default function ResetCountdown({ dailyProgress, weeklyProgress }: ResetCountdownProps) {
+  const { t } = useTranslation();
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -111,7 +113,7 @@ export default function ResetCountdown({ dailyProgress, weeklyProgress }: ResetC
                 </span>
               )}
             </div>
-            <h3 className="text-lg font-bold text-white">每日任務重設倒數</h3>
+            <h3 className="text-lg font-bold text-white">{t('resetCountdown.daily')}</h3>
           </div>
         </div>
         <div className="text-right">
@@ -136,14 +138,14 @@ export default function ResetCountdown({ dailyProgress, weeklyProgress }: ResetC
                 </span>
               )}
             </div>
-            <h3 className="text-lg font-bold text-white">每週任務重設倒數</h3>
+            <h3 className="text-lg font-bold text-white">{t('resetCountdown.weekly')}</h3>
           </div>
         </div>
         <div className="text-right">
           <p className="text-xl font-mono font-medium text-indigo-400">
             {formatCountdown(weeklyReset)}
           </p>
-          <p className="text-[10px] text-[#666]">週二 16:00 (GMT+8)</p>
+          <p className="text-[10px] text-[#666]">{t('resetCountdown.weeklyTime')}</p>
         </div>
       </div>
 
@@ -154,7 +156,7 @@ export default function ResetCountdown({ dailyProgress, weeklyProgress }: ResetC
           </div>
           <div>
             <p className="text-[10px] text-[#9e9e9e] uppercase font-bold tracking-widest">Levequest Allowance</p>
-            <h3 className="text-lg font-bold text-white">理符受理限額補充</h3>
+            <h3 className="text-lg font-bold text-white">{t('resetCountdown.levequest')}</h3>
           </div>
         </div>
         <div className="text-right">
@@ -172,14 +174,14 @@ export default function ResetCountdown({ dailyProgress, weeklyProgress }: ResetC
           </div>
           <div>
             <p className="text-[10px] text-[#9e9e9e] uppercase font-bold tracking-widest">Ocean Fishing</p>
-            <h3 className="text-lg font-bold text-white">出海垂釣時間</h3>
+            <h3 className="text-lg font-bold text-white">{t('resetCountdown.oceanFishing')}</h3>
           </div>
         </div>
         <div className="text-right">
           <p className="text-xl font-mono font-medium text-sky-500">
             {formatCountdown(oceanFishingDeparture)}
           </p>
-          <p className="text-[10px] text-[#666]">每2小時一班 (GMT+8)</p>
+          <p className="text-[10px] text-[#666]">{t('resetCountdown.oceanFishingTime')}</p>
         </div>
       </div>
     </div>

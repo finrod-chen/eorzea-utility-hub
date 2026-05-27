@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -18,10 +19,10 @@ import {
 import { DUNGEONS, Dungeon, Boss, Mechanic, RoleType } from '../data/dungeons';
 
 const roleConfig: Record<RoleType, { icon: any; color: string; bg: string; label: string }> = {
-  tank: { icon: Shield, color: 'text-blue-400', bg: 'bg-blue-400/10', label: '坦克' },
-  healer: { icon: Heart, color: 'text-emerald-400', bg: 'bg-emerald-400/10', label: '補職' },
-  dps: { icon: Sword, color: 'text-rose-400', bg: 'bg-rose-400/10', label: '輸出' },
-  all: { icon: Zap, color: 'text-amber-400', bg: 'bg-amber-400/10', label: '全員' }
+  tank: { icon: Shield, color: 'text-blue-400', bg: 'bg-blue-400/10', label: t('dungeonGuide.roles.tank') },
+  healer: { icon: Heart, color: 'text-emerald-400', bg: 'bg-emerald-400/10', label: t('dungeonGuide.roles.healer') },
+  dps: { icon: Sword, color: 'text-rose-400', bg: 'bg-rose-400/10', label: t('dungeonGuide.roles.dps') },
+  all: { icon: Zap, color: 'text-amber-400', bg: 'bg-amber-400/10', label: t('dungeonGuide.roles.all') }
 };
 
 const expansionTabs = [
@@ -35,6 +36,7 @@ const expansionTabs = [
 ];
 
 export default function DungeonGuide() {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -55,10 +57,10 @@ export default function DungeonGuide() {
           <span className="text-sm font-bold uppercase tracking-[0.3em] text-[#D39E47]">Cheat Sheet</span>
         </div>
         <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight">
-          副本機制 <span className="text-[#D39E47]">速查攻略</span>
+          {t('dungeonGuide.title')} <span className="text-[#D39E47]">{t('dungeonGuide.subtitle')}</span>
         </h1>
         <p className="text-[#9e9e9e] max-w-2xl leading-relaxed">
-          專為冒險者設計的「一句話攻略」。在副本過場動畫時，快速複習關鍵機制與職能重點。
+          {t('dungeonGuide.subtitle')}
         </p>
       </header>
 
@@ -68,7 +70,7 @@ export default function DungeonGuide() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
           <input
             type="text"
-            placeholder="搜尋副本名稱..."
+            placeholder={t('dungeonGuide.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-[#1a1a1a] border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#D39E47]/50 transition-colors"
@@ -190,8 +192,8 @@ export default function DungeonGuide() {
             <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
               <Search size={32} className="text-white/20" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">找不到相關副本</h3>
-            <p className="text-[#9e9e9e] text-sm">請嘗試不同的關鍵字或切換資料片標籤。</p>
+<h3 className="text-xl font-bold text-white mb-2">{t('dungeonGuide.noMatch')}</h3>
+            <p className="text-[#9e9e9e] text-sm">{t('dungeonGuide.feedback')}</p>
           </div>
         )}
       </div>
@@ -202,10 +204,10 @@ export default function DungeonGuide() {
           <Info className="text-[#D39E47]" size={24} />
         </div>
         <div className="space-y-1">
-          <h4 className="text-sm font-bold text-[#D39E47] uppercase tracking-widest">Pro Tip</h4>
+<h4 className="text-sm font-bold text-[#D39E47] uppercase tracking-widest">{t('dungeonGuide.coreMechanic')}</h4>
           <p className="text-xs text-[#9e9e9e] leading-relaxed">
-            本工具僅提供核心機制提醒。對於極神、零式等高難度內容，建議搭配詳細影片攻略使用。
-            若發現機制有誤或想補充副本，歡迎聯絡開發者。
+            {t('dungeonGuide.quickGuide')}
+            {t('dungeonGuide.disclaimer')}
           </p>
         </div>
       </div>
