@@ -1,9 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { Clock, CheckCircle2, Circle, MapPin, Info, Filter, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { SIGHTSEEING_LOGS, MAPS } from '../data/ff14Data';
 import { translateWeather, translateEmote, calculateWeatherSeed } from '../utils/ff14';
 
 export default function SightseeingLog({ et }: { et: any }) {
+  const { t } = useTranslation();
   const [completed, setCompleted] = useState<string[]>([]);
   const [selectedVersion, setSelectedVersion] = useState<string>('All');
   const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
@@ -82,25 +84,25 @@ export default function SightseeingLog({ et }: { et: any }) {
             <img src="/tools/SightseeingLog.png" alt="" className="w-5 h-5 object-contain" referrerPolicy="no-referrer" />
             <span className="text-xs font-bold uppercase tracking-widest">Sightseeing Log</span>
           </div>
-          <h1 className="text-3xl font-bold text-white">探索筆記助手</h1>
-          <p className="text-[#9e9e9e] text-sm max-w-md">追蹤您的探索進度，並根據當前時間與天氣自動篩選可完成的目標。</p>
+          <h1 className="text-3xl font-bold text-white">{t('sightseeingLog.title')}</h1>
+          <p className="text-[#9e9e9e] text-sm max-w-md">{t('sightseeingLog.subtitle')}</p>
         </div>
         <div className="flex flex-col items-end gap-3">
           <div className="bg-[#1a1a1a] px-4 py-2 rounded-xl border border-white/5 flex items-center gap-3">
-            <span className="text-xs text-[#9e9e9e]">完成進度</span>
+            <span className="text-xs text-[#9e9e9e]">{t('sightseeingLog.progress')}</span>
             <span className="text-indigo-400 font-bold">{completed.length} / {SIGHTSEEING_LOGS.length}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 bg-[#1a1a1a] px-3 py-1.5 rounded-xl border border-white/5">
-              <span className="text-[10px] text-[#9e9e9e] uppercase font-bold px-1">排序</span>
+              <span className="text-[10px] text-[#9e9e9e] uppercase font-bold px-1">{t('sightseeingLog.sortBy')}</span>
               <select 
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
                 className="bg-transparent text-xs text-white font-bold focus:outline-none cursor-pointer"
               >
-                <option value="id" className="bg-[#1a1a1a]">預設編號</option>
-                <option value="version" className="bg-[#1a1a1a]">版本</option>
-                <option value="map" className="bg-[#1a1a1a]">地圖名稱</option>
+                <option value="id" className="bg-[#1a1a1a]">{t('sightseeingLog.defaultOrder')}</option>
+                <option value="version" className="bg-[#1a1a1a]">{t('sightseeingLog.patch')}</option>
+                <option value="map" className="bg-[#1a1a1a]">{t('sightseeingLog.zoneName')}</option>
               </select>
             </div>
             <button 
@@ -111,7 +113,7 @@ export default function SightseeingLog({ et }: { et: any }) {
               `}
             >
               <Filter size={14} />
-              僅顯示目前可完成
+              {t('sightseeingLog.showCompletableOnly')}
             </button>
           </div>
         </div>
@@ -149,7 +151,7 @@ export default function SightseeingLog({ et }: { et: any }) {
               >
                 {log.isAvailable && !isDone && (
                   <div className="absolute top-0 right-0 px-3 py-1 bg-emerald-500 text-white text-[10px] font-bold rounded-bl-lg">
-                    目前可完成
+                    {t('sightseeingLog.completableNow')}
                   </div>
                 )}
                 
@@ -177,7 +179,7 @@ export default function SightseeingLog({ et }: { et: any }) {
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock size={14} />
-                        {log.time === 'Any' ? '任何時間' : log.time}
+                        {log.time === 'Any' ? t('sightseeingLog.anyTime') : log.time}
                       </div>
                       <div className="flex items-center gap-1">
                         <Info size={14} />
@@ -189,7 +191,7 @@ export default function SightseeingLog({ et }: { et: any }) {
                 </div>
 
                 <div className="flex flex-wrap md:flex-col gap-2 justify-center md:items-end">
-                  <div className="text-[10px] text-[#9e9e9e] uppercase font-bold mb-1">所需天氣</div>
+                  <div className="text-[10px] text-[#9e9e9e] uppercase font-bold mb-1">{t('sightseeingLog.requiredWeather')}</div>
                   <div className="flex flex-wrap gap-2 justify-end">
                     {log.weather.map(w => (
                       <span 
@@ -206,7 +208,7 @@ export default function SightseeingLog({ et }: { et: any }) {
                   {log.isAvailable && !isDone && (
                     <div className="mt-2 text-[10px] text-emerald-400 font-bold flex items-center gap-1">
                       <CheckCircle2 size={12} />
-                      條件已達成
+                      {t('sightseeingLog.conditionMet')}
                     </div>
                   )}
                 </div>
@@ -219,15 +221,15 @@ export default function SightseeingLog({ et }: { et: any }) {
               <AlertCircle size={32} />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">無符合條件的目標</h3>
-              <p className="text-sm text-[#9e9e9e]">目前沒有符合篩選條件的探索筆記目標。</p>
+              <h3 className="text-lg font-bold text-white">{t('sightseeingLog.noMatch')}</h3>
+              <p className="text-sm text-[#9e9e9e]">{t('sightseeingLog.noMatchDesc')}</p>
             </div>
             {showOnlyAvailable && (
               <button 
                 onClick={() => setShowOnlyAvailable(false)}
                 className="text-indigo-400 text-sm font-bold hover:underline"
               >
-                顯示所有目標
+                {t('sightseeingLog.showAll')}
               </button>
             )}
           </div>

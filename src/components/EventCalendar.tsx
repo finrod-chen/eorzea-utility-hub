@@ -5,7 +5,7 @@ import DatePicker, { registerLocale } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { zhTW } from 'date-fns/locale';
 
-import { fetchOfficialEvents, OfficialEvent } from '../services/eventService';
+import { useTranslation } from 'react-i18next';
 
 registerLocale('zh-TW', zhTW);
 
@@ -20,43 +20,28 @@ export interface CalendarEvent {
   url?: string;
 }
 
-const typeConfig: Record<EventType, { label: string; color: string; bg: string }> = {
-  raid: { label: '團練', color: 'text-rose-500', bg: 'bg-rose-500/10' },
-  fc: { label: 'FC聚會', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-  other: { label: '其他', color: 'text-amber-500', bg: 'bg-amber-500/10' },
-  official: { label: '官方活動', color: 'text-[#00B0FF]', bg: 'bg-[#00B0FF]/10' },
-};
-
 interface EventCalendarProps {
   events: CalendarEvent[];
   setEvents: React.Dispatch<React.SetStateAction<CalendarEvent[]>>;
+  officialEvents: CalendarEvent[];
 }
 
-export default function EventCalendar({ events, setEvents }: EventCalendarProps) {
+export default function EventCalendar({ events, setEvents, officialEvents }: EventCalendarProps) {
+  const { t } = useTranslation();
+
+  const typeConfig: Record<EventType, { label: string; color: string; bg: string }> = {
+    raid: { label: t('eventCalendar.raids'), color: 'text-rose-500', bg: 'bg-rose-500/10' },
+    fc: { label: t('eventCalendar.gatherings'), color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    other: { label: t('eventCalendar.other'), color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    official: { label: t('eventCalendar.official'), color: 'text-[#00B0FF]', bg: 'bg-[#00B0FF]/10' },
+  };
+
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editEvent, setEditEvent] = useState<CalendarEvent | null>(null);
   const [newEvent, setNewEvent] = useState({ title: '', date: new Date(), type: 'raid' as EventType, desc: '' });
   const [isTypeOpen, setIsTypeOpen] = useState(false);
   const [isEditTypeOpen, setIsEditTypeOpen] = useState(false);
-  const [officialEvents, setOfficialEvents] = useState<CalendarEvent[]>([]);
-
-  useEffect(() => {
-    const loadEvents = async () => {
-      const data = await fetchOfficialEvents();
-      const mapped: CalendarEvent[] = data.map((e: OfficialEvent) => ({
-        id: e.eventid,
-        title: e.title,
-        date: e.date || new Date().toISOString(),
-        type: 'official',
-        desc: '官方舉辦的活動',
-        url: e.url
-      }));
-      setOfficialEvents(mapped);
-    };
-
-    loadEvents();
-  }, []);
 
   const allEvents = [...events, ...officialEvents].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
@@ -120,15 +105,15 @@ export default function EventCalendar({ events, setEvents }: EventCalendarProps)
             <img src="/tools/EventCalendar.png" alt="" className="w-5 h-5 object-contain" referrerPolicy="no-referrer" />
             <span className="text-xs font-bold uppercase tracking-widest">Event Calendar</span>
           </div>
-          <h1 className="text-3xl font-bold text-white">活動行事曆</h1>
-          <p className="text-[#9e9e9e] text-sm max-w-md">管理 FC 或固定團的活動排程，新增、編輯或刪除活動，並在首頁快速查看接下來的行程。</p>
+          <h1 className="text-3xl font-bold text-white">{t('eventCalendar.title')}</h1>
+          <p className="text-[#9e9e9e] text-sm max-w-md">{t('eventCalendar.personalDesc')}</p>
         </div>
         <button 
           onClick={() => setIsAdding(!isAdding)}
           className="flex items-center gap-2 bg-[#D39E47] text-black px-4 py-3 rounded-xl font-bold hover:bg-[#b88a3d] transition-colors self-start"
         >
           <Plus size={20} />
-          新增活動
+          {t('eventCalendar.addEvent')}
         </button>
       </header>
 
@@ -141,7 +126,7 @@ export default function EventCalendar({ events, setEvents }: EventCalendarProps)
             className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 space-y-4"
           >
             <input 
-              type="text" placeholder="活動名稱" value={newEvent.title}
+              type="text" placeholder={t('eventCalendar.eventName')} value={newEvent.title}
               onChange={e => setNewEvent({...newEvent, title: e.target.value})}
               className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-white placeholder-white/20"
             />
@@ -152,7 +137,7 @@ export default function EventCalendar({ events, setEvents }: EventCalendarProps)
                 showTimeSelect
                 dateFormat="yyyy/MM/dd HH:mm"
                 locale="zh-TW"
-                placeholderText="選擇日期與時間"
+                placeholderText={t('eventCalendar.selectDateTime')}
                 className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white focus:border-[#D39E47] focus:ring-1 focus:ring-[#D39E47] transition-colors"
                 calendarClassName="bg-[#1a1a1a] border border-white/10 text-white"
               />
@@ -164,7 +149,7 @@ export default function EventCalendar({ events, setEvents }: EventCalendarProps)
               setIsOpen={setIsTypeOpen} 
             />
             <textarea 
-              placeholder="活動說明" value={newEvent.desc}
+              placeholder={t('eventCalendar.eventDesc')} value={newEvent.desc}
               onChange={e => setNewEvent({...newEvent, desc: e.target.value})}
               className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white placeholder-white/20 focus:border-[#D39E47] focus:ring-1 focus:ring-[#D39E47] transition-colors"
             />
@@ -172,7 +157,7 @@ export default function EventCalendar({ events, setEvents }: EventCalendarProps)
               onClick={addEvent} 
               className="w-full bg-[#D39E47] text-black py-3 rounded-xl font-bold hover:bg-[#b88a3d] transition-colors"
             >
-              確認新增
+              {t('eventCalendar.confirmAdd')}
             </button>
           </motion.div>
         )}
@@ -180,7 +165,7 @@ export default function EventCalendar({ events, setEvents }: EventCalendarProps)
 
       <div className="grid gap-4">
         {allEvents.length === 0 ? (
-          <div className="text-center py-12 text-[#9e9e9e]">目前沒有排定的活動。</div>
+          <div className="text-center py-12 text-[#9e9e9e]">{t('eventCalendar.noEvents')}</div>
         ) : (
           allEvents.map(event => (
             <motion.div key={event.id} className="bg-[#1a1a1a] border border-white/5 rounded-xl p-4 flex items-center justify-between hover:border-white/10 transition-colors">

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { History, CheckCircle2, Star, Zap } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -115,6 +116,8 @@ const updates = [
 ];
 
 export default function Changelog() {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-8">
       <header className="space-y-2">
@@ -124,9 +127,9 @@ export default function Changelog() {
         </div>
         <h1 className="text-3xl font-bold text-white flex items-center gap-3">
           <History className="text-amber-500" size={32} />
-          更新日誌
+          {t('changelog.title')}
         </h1>
-        <p className="text-[#9e9e9e] text-sm max-w-md">追蹤艾歐澤亞生活助手的成長足跡與功能改進。</p>
+        <p className="text-[#9e9e9e] text-sm max-w-md">{t('changelog.latest')}</p>
       </header>
 
       <div className="space-y-6">
@@ -185,7 +188,7 @@ export default function Changelog() {
 
       <footer className="pt-10 text-center">
         <p className="text-xs text-[#9e9e9e]">
-          持續為艾歐澤亞的冒險者提供更好的服務。
+          {t('changelog.footer')}
         </p>
       </footer>
     </div>

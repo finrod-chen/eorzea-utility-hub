@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { CheckSquare, Calendar, Clock, RotateCcw, Info, Star, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { INITIAL_TASKS } from '../constants/tasks';
 import { formatTimestamp } from '../utils/taskUtils';
 
 export default function DutyChecklist() {
+  const { t, i18n } = useTranslation();
+  const isEnglish = i18n.language === 'en';
   const [completed, setCompleted] = useState<Record<string, string | null>>({});
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -88,8 +91,8 @@ export default function DutyChecklist() {
           <img src="/tools/DutyChecklist.png" alt="" className="w-5 h-5 object-contain" referrerPolicy="no-referrer" />
           <span className="text-xs font-bold uppercase tracking-widest text-indigo-400">Duty Checklist</span>
         </div>
-        <h1 className="text-3xl font-bold text-white">任務進度</h1>
-        <p className="text-[#9e9e9e] text-sm max-w-md">追蹤您的每日與每週任務完成情況，支援自動儲存。</p>
+        <h1 className="text-3xl font-bold text-white">{t('dutyChecklist.title')}</h1>
+        <p className="text-[#9e9e9e] text-sm max-w-md">{t('dutyChecklist.subtitle')}</p>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -101,8 +104,8 @@ export default function DutyChecklist() {
                 <Clock size={20} />
               </div>
               <div>
-                <h2 className="font-bold text-white">每日任務</h2>
-                <p className="text-[10px] text-[#9e9e9e] uppercase tracking-widest">每日 23:00 (GMT+8) 重置</p>
+                <h2 className="font-bold text-white">{t('dutyChecklist.dailyTasks')}</h2>
+                <p className="text-[10px] text-[#9e9e9e] uppercase tracking-widest">{t('dutyChecklist.daily')} 23:00 (GMT+8) {t('dutyChecklist.resetAt')}</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -111,7 +114,7 @@ export default function DutyChecklist() {
                   <span className="text-sm font-bold text-white">{dailyProgress.done}/{dailyProgress.total}</span>
                   {dailyProgress.allDoneTime && (
                     <span className="text-[10px] text-emerald-500 font-medium bg-emerald-500/10 px-2 py-0.5 rounded-full mt-1">
-                      達成時間: {formatTimestamp(dailyProgress.allDoneTime)}
+                      {t('dutyChecklist.achievedAt')}: {formatTimestamp(dailyProgress.allDoneTime)}
                     </span>
                   )}
                 </div>
@@ -126,7 +129,7 @@ export default function DutyChecklist() {
               <button 
                 onClick={() => resetCategory('daily')}
                 className="p-2 hover:bg-white/5 rounded-lg text-[#9e9e9e] hover:text-white transition-colors"
-                title="重置每日"
+                title={t('dutyChecklist.resetDaily')}
               >
                 <RotateCcw size={16} />
               </button>
@@ -154,16 +157,16 @@ export default function DutyChecklist() {
                 <div className="flex-1 text-left">
                   <div className="flex justify-between items-start">
                     <span className={`text-sm font-medium ${completed[task.id] ? 'text-[#9e9e9e] line-through' : 'text-white'}`}>
-                      {task.label}
+                      {isEnglish ? task.labelEn : task.label}
                     </span>
                     {completed[task.id] && (
                       <span className="text-[10px] text-emerald-500 font-mono ml-2 shrink-0 bg-emerald-500/10 px-2 py-0.5 rounded-md">
-                        完成於 {formatTimestamp(completed[task.id])}
+                        {t('dutyChecklist.completedAt')} {formatTimestamp(completed[task.id])}
                       </span>
                     )}
                   </div>
                   {task.reward && (
-                    <p className="text-[10px] text-[#666] mt-0.5">{task.reward}</p>
+                    <p className="text-[10px] text-[#666] mt-0.5">{isEnglish ? task.rewardEn : task.reward}</p>
                   )}
                 </div>
               </motion.button>
@@ -179,8 +182,8 @@ export default function DutyChecklist() {
                 <Calendar size={20} />
               </div>
               <div>
-                <h2 className="font-bold text-white">每週任務</h2>
-                <p className="text-[10px] text-[#9e9e9e] uppercase tracking-widest">每週二 16:00 (GMT+8) 重置</p>
+                <h2 className="font-bold text-white">{t('dutyChecklist.weeklyTasks')}</h2>
+                <p className="text-[10px] text-[#9e9e9e] uppercase tracking-widest">{t('dutyChecklist.weekly')} 16:00 (GMT+8) {t('dutyChecklist.resetAt')}</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -189,7 +192,7 @@ export default function DutyChecklist() {
                   <span className="text-sm font-bold text-white">{weeklyProgress.done}/{weeklyProgress.total}</span>
                   {weeklyProgress.allDoneTime && (
                     <span className="text-[10px] text-indigo-400 font-medium bg-indigo-500/10 px-2 py-0.5 rounded-full mt-1">
-                      達成時間: {formatTimestamp(weeklyProgress.allDoneTime)}
+                      {t('dutyChecklist.achievedAt')}: {formatTimestamp(weeklyProgress.allDoneTime)}
                     </span>
                   )}
                 </div>
@@ -204,7 +207,7 @@ export default function DutyChecklist() {
               <button 
                 onClick={() => resetCategory('weekly')}
                 className="p-2 hover:bg-white/5 rounded-lg text-[#9e9e9e] hover:text-white transition-colors"
-                title="重置每週"
+                title={t('dutyChecklist.resetWeekly')}
               >
                 <RotateCcw size={16} />
               </button>
@@ -232,16 +235,16 @@ export default function DutyChecklist() {
                 <div className="flex-1 text-left">
                   <div className="flex justify-between items-start">
                     <span className={`text-sm font-medium ${completed[task.id] ? 'text-[#9e9e9e] line-through' : 'text-white'}`}>
-                      {task.label}
+                      {isEnglish ? task.labelEn : task.label}
                     </span>
                     {completed[task.id] && (
                       <span className="text-[10px] text-indigo-400 font-mono ml-2 shrink-0 bg-indigo-500/10 px-2 py-0.5 rounded-md">
-                        完成於 {formatTimestamp(completed[task.id])}
+                        {t('dutyChecklist.completedAt')} {formatTimestamp(completed[task.id])}
                       </span>
                     )}
                   </div>
                   {task.reward && (
-                    <p className="text-[10px] text-[#666] mt-0.5">{task.reward}</p>
+                    <p className="text-[10px] text-[#666] mt-0.5">{isEnglish ? task.rewardEn : task.reward}</p>
                   )}
                 </div>
               </motion.button>
@@ -254,10 +257,9 @@ export default function DutyChecklist() {
       <div className="bg-white/5 rounded-3xl p-6 border border-white/5 flex gap-4">
         <Info className="text-indigo-400 shrink-0" size={20} />
         <div className="space-y-1">
-          <h4 className="text-sm font-bold text-white">關於重置時間</h4>
+          <h4 className="text-sm font-bold text-white">{t('dutyChecklist.aboutReset')}</h4>
           <p className="text-xs text-[#9e9e9e] leading-relaxed">
-            目前的重置時間為手動參考。未來版本將加入自動重置偵測功能。
-            所有進度皆儲存於您的瀏覽器中，清除快取將會重置進度。
+            {t('dutyChecklist.resetNote')}. {t('dutyChecklist.clearCacheWarning')}.
           </p>
         </div>
       </div>

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { CloudSun, Search, Filter, MapPin, Sun, Cloud, CloudRain, CloudLightning, CloudSnow, Wind, CloudFog, Info } from 'lucide-react';
 import { MAPS } from '../data/ff14Data';
 import { calculateWeatherSeed, translateWeather, translateRegion } from '../utils/ff14';
+import { useTranslation } from 'react-i18next';
+import type { EorzeaTime } from '../types';
 
 const getWeatherIcon = (weather: string) => {
   switch (weather) {
@@ -27,7 +29,8 @@ const getWeatherIcon = (weather: string) => {
   }
 };
 
-export default function Skywatcher({ et }: { et: any }) {
+export default function Skywatcher({ et }: { et: EorzeaTime }) {
+  const { t, i18n } = useTranslation();
   const [selectedVersion, setSelectedVersion] = useState<string>('2.0');
   const [selectedMap, setSelectedMap] = useState(MAPS[0]);
   const [forecast, setForecast] = useState<any[]>([]);
@@ -42,7 +45,9 @@ export default function Skywatcher({ et }: { et: any }) {
       map.rates.forEach(r => weathers.add(r.name));
     });
     return Array.from(weathers).sort((a, b) => translateWeather(a).localeCompare(translateWeather(b)));
-  }, []);
+  // Re-sort when language changes so translated names are in the correct locale order.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [i18n.language]);
   
   const filteredMaps = React.useMemo(() => {
     return MAPS.filter(map => {
@@ -111,8 +116,8 @@ export default function Skywatcher({ et }: { et: any }) {
             <img src="/tools/Skywatcher.png" alt="Skywatcher" className="w-6 h-6 object-contain" referrerPolicy="no-referrer" />
             <span className="text-xs font-bold uppercase tracking-widest">Skywatcher</span>
           </div>
-          <h1 className="text-3xl font-bold text-white">艾歐澤亞天氣預報</h1>
-          <p className="text-[#9e9e9e] text-sm max-w-md">查詢各地圖的未來天氣變換，協助您完成探索筆記或捕捉稀有獵物。</p>
+<h1 className="text-3xl font-bold text-white">{t('skywatcher.title')}</h1>
+          <p className="text-[#9e9e9e] text-sm max-w-md">{t('skywatcher.subtitle')}</p>
         </div>
       </header>
 
@@ -141,7 +146,7 @@ export default function Skywatcher({ et }: { et: any }) {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9e9e9e]" size={16} />
               <input 
                 type="text" 
-                placeholder="搜尋地圖..." 
+                placeholder={t('skywatcher.searchZone')} 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-[#1a1a1a] border border-white/5 rounded-xl py-2 pl-10 pr-4 text-sm focus:border-emerald-500 outline-none transition-all"
@@ -150,13 +155,13 @@ export default function Skywatcher({ et }: { et: any }) {
 
             <div className="bg-[#1a1a1a] rounded-xl border border-white/5 p-2">
               <div className="flex items-center justify-between px-2 mb-2">
-                <span className="text-[10px] font-bold text-[#9e9e9e] uppercase">天氣篩選</span>
+                <span className="text-[10px] font-bold text-[#9e9e9e] uppercase">{t('skywatcher.weatherFilter')}</span>
                 {selectedWeather !== 'All' && (
                   <button 
                     onClick={() => setSelectedWeather('All')}
                     className="text-[10px] text-emerald-500 hover:underline"
                   >
-                    清除
+                    {t('skywatcher.clear')}
                   </button>
                 )}
               </div>
@@ -167,7 +172,7 @@ export default function Skywatcher({ et }: { et: any }) {
                     p-1.5 rounded-lg flex items-center justify-center transition-all
                     ${selectedWeather === 'All' ? 'bg-emerald-500/20 text-emerald-500 ring-1 ring-emerald-500/50' : 'hover:bg-white/5 text-[#9e9e9e]'}
                   `}
-                  title="全部"
+                  title={t('skywatcher.all')}
                 >
                   <Filter size={14} />
                 </button>
@@ -190,7 +195,7 @@ export default function Skywatcher({ et }: { et: any }) {
           
           <div className="bg-[#1a1a1a] rounded-2xl border border-white/5 overflow-hidden">
             <div className="p-3 border-b border-white/5 bg-white/5 flex items-center justify-between">
-              <span className="text-xs font-bold text-[#9e9e9e] uppercase">地圖列表 (v{selectedVersion})</span>
+              <span className="text-xs font-bold text-[#9e9e9e] uppercase">{t('skywatcher.zoneList')} (v{selectedVersion})</span>
               <Filter size={14} className="text-[#9e9e9e]" />
             </div>
             <div className="max-h-[50vh] overflow-y-auto custom-scrollbar">
@@ -224,8 +229,8 @@ export default function Skywatcher({ et }: { et: any }) {
                 {selectedMap.name}
                 <span className="text-xs font-normal text-[#9e9e9e] bg-white/5 px-2 py-1 rounded-md">Forecast</span>
               </h2>
-              <div className="text-xs text-[#9e9e9e]">
-                更新頻率：每 8 艾歐澤亞小時
+<div className="text-xs text-[#9e9e9e]">
+                {t('skywatcher.updateFreq')}：{t('skywatcher.each')} 8 {t('skywatcher.etHours')}
               </div>
             </div>
 
@@ -256,8 +261,8 @@ export default function Skywatcher({ et }: { et: any }) {
                 <Info size={18} className="text-emerald-500" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">地區天氣機率</h3>
-                <p className="text-xs text-[#9e9e9e]">{selectedMap.name} 的天氣分佈</p>
+<h3 className="text-lg font-bold text-white">{t('skywatcher.weatherDist')}</h3>
+                <p className="text-xs text-[#9e9e9e]">{selectedMap.name} {t('skywatcher.weatherDist')}</p>
               </div>
             </div>
             
@@ -281,10 +286,8 @@ export default function Skywatcher({ et }: { et: any }) {
               <Filter size={20} className="text-emerald-500" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-white mb-1">天氣篩選提示</h4>
-              <p className="text-xs text-[#9e9e9e] leading-relaxed">
-                某些稀有怪或探索點需要特定的天氣組合（如：從「晴朗」轉為「暴雨」）。您可以點擊天氣圖示來追蹤特定變換，我們將在條件達成前通知您。
-              </p>
+<h4 className="text-sm font-bold text-white mb-1">{t('skywatcher.filterTip')}</h4>
+              <p className="text-xs text-[#9e9e9e] leading-relaxed">{t('skywatcher.filterTipDesc')} {t('skywatcher.filterTipAction')}</p>
             </div>
           </div>
         </div>

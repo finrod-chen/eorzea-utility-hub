@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Home, 
@@ -28,6 +29,7 @@ import {
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import { getEorzeaTime } from './utils/ff14';
+import { fetchOfficialEvents, OfficialEvent } from './services/eventService';
 
 // Components
 import MiniCactpot from './components/MiniCactpot';
@@ -47,10 +49,14 @@ import SetAlarm from './components/SetAlarm';
 import InteractiveMaps from './components/InteractiveMaps';
 
 import KoFiWidget from './components/KoFiWidget';
+import LanguageSwitcher from './components/LanguageSwitcher';
 import { Alarm, EorzeaTime, View } from './types';
 import { NAV_GROUPS } from './constants/tools';
 
 export default function App() {
+  // ── i18n (declared first so effects below can reference `t`) ────────────
+  const { t } = useTranslation();
+
   const [currentView, setCurrentView] = useState<View>('home');
   const [events, setEvents] = useState<CalendarEvent[]>(() => {
     const saved = localStorage.getItem('ff14-events');
@@ -83,9 +89,11 @@ export default function App() {
   }, [alarms]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
   const [now, setNow] = useState(new Date());
   const [et, setEt] = useState<EorzeaTime>(getEorzeaTime());
-  const [localTime, setLocalTime] = useState(new Date());
+  const [officialEvents, setOfficialEvents] = useState<OfficialEvent[]>([]);
+
   // ── Clock tick (single source of truth) ──────────────────────────────────
   useEffect(() => {
     const tick = () => setNow(new Date());
@@ -94,9 +102,30 @@ export default function App() {
     return () => clearInterval(timer);
   }, []);
 
-  // ── Derive ET and localTime from now ──────────────────────────────────────
+  // ── Derive ET from now ────────────────────────────────────────────────────
   useEffect(() => { setEt(getEorzeaTime(now)); }, [now]);
-  useEffect(() => { setLocalTime(now); }, [now]);
+
+  // ── Official events (single fetch, shared by Dashboard + EventCalendar) ──
+  useEffect(() => {
+    fetchOfficialEvents().then(setOfficialEvents);
+  }, []);
+
+  // ── Back-to-top visibility ─────────────────────────────────────────────────
+  useEffect(() => {
+    const main = document.getElementById('main-content');
+    if (!main) return;
+    const onScroll = () => setShowBackToTop(main.scrollTop > 200);
+    main.addEventListener('scroll', onScroll, { passive: true });
+    return () => main.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // ── ESC key closes mobile sidebar ─────────────────────────────────────────
+  useEffect(() => {
+    if (!isSidebarOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsSidebarOpen(false); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [isSidebarOpen]);
 
   // ── Alarm trigger ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -104,26 +133,31 @@ export default function App() {
     const nextAlarms = alarms.map(alarm => {
       if (!alarm.active || now < alarm.targetTime) return alarm;
 
+      // alarm.label may be an i18n key (new format) or a legacy Chinese string.
+      // t() returns the key unchanged when it has no translation, so legacy labels
+      // still display correctly without any migration step.
+      const alarmLabel = t(alarm.label, { defaultValue: alarm.label });
+
       if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-        new Notification('艾歐澤亞助手 - 鬧鐘提醒', {
-          body: `${alarm.label} 時間到了！`,
+        new Notification(t('setAlarm.appName') + ' - ' + t('setAlarm.timeUp'), {
+          body: `${alarmLabel} ${t('setAlarm.timeUp')}`,
           icon: '/logo.png',
           tag: alarm.id,
         });
       }
 
-      toast.success(`${alarm.label} 時間到了！`, {
-        description: `設定時間：${alarm.targetTime.toLocaleTimeString()}`,
+      toast.success(`${alarmLabel} ${t('setAlarm.timeUp')}`, {
+        description: `${t('setAlarm.customAlarm')}：${alarm.targetTime.toLocaleTimeString()}`,
         duration: 10000,
         icon: <Bell className="text-amber-500" size={18} />,
       });
 
       try {
-        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        const audio = new Audio('/audio/alarm.mp3');
         audio.volume = 0.5;
-        audio.play().catch(e => console.log('[App] Audio play blocked:', e));
-      } catch (e) {
-        console.warn('[App] Audio playback failed:', e);
+        audio.play().catch(() => {});
+      } catch {
+        // Audio playback blocked by browser — silent fail is acceptable
       }
 
       changed = true;
@@ -132,12 +166,6 @@ export default function App() {
 
     if (changed) setAlarms(nextAlarms);
   }, [now, alarms]);
-
-  useEffect(() => {
-    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
-  }, []);
 
   // Stagger children 50ms per nav item when group opens
   const navItemVariants = {
@@ -155,57 +183,31 @@ export default function App() {
 
   const [openGroups, setOpenGroups] = useState<string[]>([]);
 
-  const toggleGroup = (label: string) => {
+  const toggleGroup = (key: string) => {
     setOpenGroups(prev =>
-      prev.includes(label) ? prev.filter(g => g !== label) : [...prev, label]
+      prev.includes(key) ? prev.filter(g => g !== key) : [...prev, key]
     );
   };
 
-  const navGroups = [
-    {
-      label: '日常任務',
-      items: [
-        { id: 'home', label: '總覽', icon: Home, image: '/tools/Dashboard.png' },
-        { id: 'checklist', label: '任務進度', icon: CheckSquare, image: '/tools/DutyChecklist.png' },
-        { id: 'alarm', label: '自訂鬧鐘', icon: Bell, image: '/tools/SetAlarm.png' },
-        { id: 'event-calendar', label: '活動行事曆', icon: Calendar, image: '/tools/EventCalendar.png' },
-      ]
-    },
-    {
-      label: '實用工具',
-      items: [
-        { id: 'tails', label: '庫洛天書', icon: BookOpen, image: '/tools/WondrousTails.png' },
-        { id: 'market', label: '市場查詢', icon: ShoppingCart, image: '/tools/MarketBoard.png' },
-        { id: 'treasure', label: '藏寶搜尋', icon: MapIcon, image: '/tools/TreasureHunt.png' },
-        { id: 'cactpot', label: '仙人微彩', icon: Grid3X3, image: '/tools/MiniCactpot.png' },
-        { id: 'chocobo', label: '陸行鳥染色', icon: Bird, image: '/tools/ChocoboColor.png' },
-      ]
-    },
-    {
-      label: '地圖與天氣',
-      items: [
-        { id: 'weather', label: '天氣預報', icon: CloudSun, image: '/tools/Skywatcher.png' },
-        { id: 'interactive-maps', label: '互動地圖', icon: MapIcon, image: '/tools/InteractiveMaps.png' },
-        { id: 'sightseeing', label: '探索筆記', icon: Clock, image: '/tools/SightseeingLog.png' },
-      ]
-    },
-    {
-      label: '其他資源',
-      items: [
-        { id: 'links', label: '好用連結', icon: Settings, image: '/tools/UsefulLinks.png' },
-        { id: 'guide', label: '導覽輔助', icon: HelpCircle, image: '/tools/NavigationGuide.png' },
-        { id: 'changelog', label: '更新日誌', icon: History, image: '/tools/Changelog.png' },
-      ]
-    }
-  ];
+  const navGroups = NAV_GROUPS;
+
+  // Map OfficialEvent[] → CalendarEvent[] once here (shared by EventCalendar)
+  const mappedOfficialEvents = officialEvents.map(e => ({
+    id: e.eventid,
+    title: e.title,
+    date: e.date || new Date().toISOString(),
+    type: 'official' as const,
+    desc: t('eventCalendar.officialDesc'),
+    url: e.url,
+  }));
 
   const renderView = () => {
     switch (currentView) {
-      case 'home': return <Dashboard et={et} onViewChange={setCurrentView} events={events} />;
+      case 'home': return <Dashboard et={et} onViewChange={setCurrentView} events={events} officialEvents={officialEvents} />;
       case 'checklist': return <DutyChecklist />;
       case 'market': return <MarketBoard />;
       case 'alarm': return <SetAlarm alarms={alarms} setAlarms={setAlarms} now={now} />;
-      case 'event-calendar': return <EventCalendar events={events} setEvents={setEvents} />;
+      case 'event-calendar': return <EventCalendar events={events} setEvents={setEvents} officialEvents={mappedOfficialEvents} />;
       case 'cactpot': return <MiniCactpot />;
       case 'tails': return <WondrousTails />;
       case 'weather': return <Skywatcher et={et} />;
@@ -230,7 +232,7 @@ export default function App() {
           className="flex items-center gap-2 hover:opacity-80 transition-opacity"
         >
           <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-lg" referrerPolicy="no-referrer" />
-          <h1 className="font-bold text-lg tracking-tight text-white">艾歐澤亞助手</h1>
+          <h1 className="font-bold text-lg tracking-tight text-white">{t('nav.appName')}</h1>
         </button>
         <button 
           onClick={() => setIsSidebarOpen(true)}
@@ -254,39 +256,38 @@ export default function App() {
             >
               <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-xl shadow-lg shadow-[var(--color-accent-glow)]" referrerPolicy="no-referrer" />
               <div>
-                <h1 className="font-display font-bold text-lg tracking-tight text-white leading-tight">艾歐澤亞助手</h1>
+                <h1 className="font-display font-bold text-lg tracking-tight text-white leading-tight">{t('nav.appName')}</h1>
                 <p className="text-[10px] uppercase tracking-widest text-[var(--color-accent)] font-semibold font-sans">Utility Hub V1.9.0</p>
               </div>
             </button>
 
             <nav className="flex-1 px-4 py-4 space-y-6 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {navGroups.map((group) => (
-                <div key={group.label} className="space-y-1">
-                  <button 
-                    onClick={() => toggleGroup(group.label)}
+                <div key={group.key} className="space-y-1">
+                  <button
+                    onClick={() => toggleGroup(group.key)}
                     className="w-full flex items-center justify-between px-4 text-[10px] font-bold text-[var(--color-text-faint)] uppercase tracking-widest mb-2 hover:text-[var(--color-text-muted)] transition-colors"
                   >
-                    {group.label}
-                    <ChevronRight size={14} className={`transition-transform ${openGroups.includes(group.label) ? 'rotate-90' : ''}`} />
+                    {t(group.label)}
+                    <ChevronRight size={14} className={`transition-transform ${openGroups.includes(group.key) ? 'rotate-90' : ''}`} />
                   </button>
-                  {openGroups.includes(group.label) && (
+                  {openGroups.includes(group.key) && (
                     <motion.div
-                      key={group.label}
+                      key={group.key}
                       variants={navContainerVariants}
                       initial="hidden"
                       animate="visible"
                       exit="hidden"
                       className="space-y-1"
                     >
-                      {group.items.map((item, i) => (
+                      {group.items.map((item) => (
                         <motion.button
                           key={item.id}
-                          custom={i}
                           variants={navItemVariants}
+                          custom={0}
                           onClick={() => {
-                            setCurrentView(item.id as View);
-                            setIsSidebarOpen(false);
-                            setOpenGroups([]);
+                            setCurrentView(item.id);
+                            setOpenGroups(prev => prev.filter(g => g !== group.key));
                             const main = document.getElementById('main-content');
                             if (main) main.scrollTo({ top: 0, behavior: 'smooth' });
                           }}
@@ -307,7 +308,7 @@ export default function App() {
                           ) : (
                             <item.icon size={20} className={currentView === item.id ? 'text-[#0E0E10]' : 'group-hover:scale-110 transition-transform text-[var(--color-text-muted)]'} />
                           )}
-                          <span className="text-sm">{item.label}</span>
+                          <span className="text-sm">{t(item.label)}</span>
                         </motion.button>
                       ))}
                     </motion.div>
@@ -316,13 +317,13 @@ export default function App() {
               ))}
             </nav>
 
-            <div className="p-4 border-t border-[var(--color-border)] space-y-2">
+            <div className="p-4 border-t border-[var(--color-border)] space-y-3">
               <div className="bg-[var(--color-bg)] rounded-2xl p-3 flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-[var(--color-accent-dim)] flex items-center justify-center shrink-0">
                   <Clock size={16} className="text-[var(--color-accent)]" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-[var(--color-text-muted)] uppercase font-bold tracking-tighter">艾歐澤亞時間 (ET)</p>
+                  <p className="text-[10px] text-[var(--color-text-muted)] uppercase font-bold tracking-tighter">{t('nav.et')}</p>
                   <p className="text-lg font-mono font-medium text-white leading-none">
                     {String(et.hours).padStart(2, '0')}:{String(et.minutes).padStart(2, '0')}
                   </p>
@@ -333,14 +334,17 @@ export default function App() {
                   <Clock size={16} className="text-emerald-500" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-[var(--color-text-muted)] uppercase font-bold tracking-tighter">本地時間 (LT)</p>
+                  <p className="text-[10px] text-[var(--color-text-muted)] uppercase font-bold tracking-tighter">{t('nav.lt')}</p>
                   <p className="text-lg font-mono font-medium text-white leading-none">
-                    {localTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                    {now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
                   </p>
                 </div>
               </div>
               <div className="kofi-widget-wrapper">
                 <KoFiWidget />
+              </div>
+              <div className="flex justify-center">
+                <LanguageSwitcher />
               </div>
             </div>
           </div>
@@ -368,18 +372,25 @@ export default function App() {
               {renderView()}
             </motion.div>
           </AnimatePresence>
-          {/* Back to Top Button — inside main so it scrolls with content */}
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            onClick={() => {
-              const main = document.getElementById('main-content');
-              if (main) main.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className="fixed bottom-6 right-6 p-3 bg-[var(--color-accent)] text-[#0E0E10] rounded-full shadow-lg hover:brightness-110 transition-all z-50"
-          >
-            <ChevronRight className="rotate-[-90deg]" size={24} />
-          </motion.button>
+          {/* Back to Top Button — only visible after scrolling 200 px */}
+          <AnimatePresence>
+            {showBackToTop && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.18 }}
+                aria-label={t('nav.backToTop')}
+                onClick={() => {
+                  const main = document.getElementById('main-content');
+                  if (main) main.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="fixed bottom-6 right-6 p-3 bg-[var(--color-accent)] text-[#0E0E10] rounded-full shadow-lg hover:brightness-110 transition-all z-50"
+              >
+                <ChevronRight className="rotate-[-90deg]" size={24} />
+              </motion.button>
+            )}
+          </AnimatePresence>
         </main>
       </div>
 

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect, useMemo } from 'react';
 import { Bird, ArrowRight, Info, RotateCcw, ListOrdered, Search, ChevronDown, Check, X, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -69,7 +70,7 @@ function ColorSelector({ label, selectedId, onSelect, colors }: ColorSelectorPro
               style={{ backgroundColor: selectedColor ? `rgb(${selectedColor.rgb.join(',')})` : 'transparent' }}
             />
             <div className="flex flex-col">
-              <span className="text-white font-bold">{selectedColor?.names.zh || '選擇顏色'}</span>
+              <span className="text-white font-bold">{selectedColor?.names.zh || t('chocoboColor.selectColor')}</span>
               <span className="text-[10px] text-[#9e9e9e] font-mono uppercase tracking-tighter">{selectedColor?.id}</span>
             </div>
           </div>
@@ -93,7 +94,7 @@ function ColorSelector({ label, selectedId, onSelect, colors }: ColorSelectorPro
                     <input
                       autoFocus
                       type="text"
-                      placeholder="搜尋顏色名稱或 ID..."
+                      placeholder={t('chocoboColor.searchPlaceholder')}
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                       className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder:text-[#666] focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/5 transition-all"
@@ -111,7 +112,7 @@ function ColorSelector({ label, selectedId, onSelect, colors }: ColorSelectorPro
                   {!search && (
                     <div className="space-y-2.5">
                       <div className="flex items-center justify-between">
-                        <p className="text-[10px] font-bold text-[#9e9e9e] uppercase tracking-widest">熱門顏色</p>
+                        <p className="text-[10px] font-bold text-[#9e9e9e] uppercase tracking-widest">{t('chocoboColor.popularColors')}</p>
                       </div>
                       <div className="flex flex-wrap gap-2.5">
                         {popularColors.map(id => {
@@ -171,7 +172,7 @@ function ColorSelector({ label, selectedId, onSelect, colors }: ColorSelectorPro
                       <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto text-[#333]">
                         <Search size={20} />
                       </div>
-                      <p className="text-[#666] text-sm italic">找不到符合的顏色</p>
+                      <p className="text-[#666] text-sm italic">{t('chocoboColor.noMatch')}</p>
                     </div>
                   )}
                 </div>
@@ -185,6 +186,7 @@ function ColorSelector({ label, selectedId, onSelect, colors }: ColorSelectorPro
 }
 
 export default function ChocoboColor() {
+  const { t } = useTranslation();
   const [currentColorId, setCurrentColorId] = useState(chocoboData.meta.defaultColor);
   const [targetColorId, setTargetColorId] = useState('snow-white');
   const [showOrder, setShowOrder] = useState(false);
@@ -314,8 +316,8 @@ export default function ChocoboColor() {
           <img src="/tools/ChocoboColor.png" alt="" className="w-5 h-5 object-contain" referrerPolicy="no-referrer" />
           <span className="text-xs font-bold uppercase tracking-widest">Chocobo Color</span>
         </div>
-        <h1 className="text-3xl font-bold text-white">陸行鳥染色計算機</h1>
-        <p className="text-[#9e9e9e] text-sm max-w-md">計算從當前顏色到目標顏色所需的水果數量與餵食順序。</p>
+<h1 className="text-3xl font-bold text-white">{t('chocoboColor.title')}</h1>
+        <p className="text-[#9e9e9e] text-sm max-w-md">{t('chocoboColor.subtitle')}</p>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -323,8 +325,8 @@ export default function ChocoboColor() {
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-[#1a1a1a] rounded-3xl p-8 border border-white/5 space-y-8">
             <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-              <ColorSelector 
-                label="目前顏色"
+<ColorSelector 
+                label={t('chocoboColor.currentColor')}
                 selectedId={currentColorId}
                 onSelect={setCurrentColorId}
                 colors={colors}
@@ -334,8 +336,8 @@ export default function ChocoboColor() {
                 <ArrowRight size={24} />
               </div>
 
-              <ColorSelector 
-                label="目標顏色"
+<ColorSelector 
+                label={t('chocoboColor.targetColor')}
                 selectedId={targetColorId}
                 onSelect={setTargetColorId}
                 colors={colors}
@@ -347,7 +349,7 @@ export default function ChocoboColor() {
                 onClick={calculate}
                 className="bg-amber-500 hover:bg-amber-400 text-black font-bold px-12 py-4 rounded-2xl transition-all shadow-lg shadow-amber-500/20 active:scale-95"
               >
-                開始計算
+                {t('chocoboColor.calculate')}
               </button>
             </div>
           </div>
@@ -366,7 +368,7 @@ export default function ChocoboColor() {
                     <div className="flex items-center gap-3">
                       <h3 className="text-xl font-bold text-white flex items-center gap-2">
                         <Bird size={20} className="text-amber-500" />
-                        所需水果
+                        {t('chocoboColor.requiredFruit')}
                       </h3>
                       {Object.keys(fedCounts).length > 0 && (
                         <button 
@@ -375,7 +377,7 @@ export default function ChocoboColor() {
                             setLastFedTime(null);
                           }}
                           className="p-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-[#9e9e9e] hover:text-white transition-colors"
-                          title="重置進度"
+                          title={t('chocoboColor.reset')}
                         >
                           <RotateCcw size={14} />
                         </button>
@@ -383,8 +385,8 @@ export default function ChocoboColor() {
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       {lastFedTime && (
-                        <span className="text-[10px] text-[#9e9e9e] font-medium">
-                          上次餵食: {lastFedTime}
+<span className="text-[10px] text-[#9e9e9e] font-medium">
+                          {t('chocoboColor.lastFed')}: {lastFedTime}
                         </span>
                       )}
                       {result.length > 0 && (
@@ -393,7 +395,7 @@ export default function ChocoboColor() {
                         className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${showOrder ? 'bg-amber-500 text-black' : 'bg-white/5 text-[#9e9e9e] hover:bg-white/10'}`}
                       >
                         <ListOrdered size={14} />
-                        {showOrder ? '隱藏餵食順序' : '顯示餵食順序'}
+                        {showOrder ? t('chocoboColor.hideSequence') : t('chocoboColor.showSequence')}
                       </button>
                     )}
                   </div>
@@ -401,7 +403,7 @@ export default function ChocoboColor() {
 
                 {result.length === 0 ? (
                     <div className="text-center py-12 text-[#9e9e9e] bg-black/20 rounded-2xl border border-dashed border-white/10">
-                      目前顏色與目標顏色相同，無需餵食水果。
+                      {t('chocoboColor.sameColor')}
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -458,14 +460,14 @@ export default function ChocoboColor() {
                               <p className={`text-sm font-bold transition-colors ${isDone ? 'text-emerald-500' : 'text-white group-hover:text-amber-500'}`}>{fruit.names.zh}</p>
                               <div className="flex items-center gap-2 mt-1">
                                 <p className="text-xs text-[#9e9e9e]">
-                                  進度: <span className={`font-mono font-bold text-base ml-1 transition-colors ${isDone ? 'text-emerald-500' : 'text-amber-500 group-hover:text-amber-400'}`}>{fedCount}</span> / {count}
+                                  {t('chocoboColor.progress')}: <span className={`font-mono font-bold text-base ml-1 transition-colors ${isDone ? 'text-emerald-500' : 'text-amber-500 group-hover:text-amber-400'}`}>{fedCount}</span> / {count}
                                 </p>
                               </div>
                             </div>
                             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                               <div className="flex flex-col gap-1">
-                                <span className="text-[8px] text-[#666] bg-black/40 px-1.5 py-0.5 rounded uppercase font-bold">左鍵 +1</span>
-                                <span className="text-[8px] text-[#666] bg-black/40 px-1.5 py-0.5 rounded uppercase font-bold">右鍵 -1</span>
+<span className="text-[8px] text-[#666] bg-black/40 px-1.5 py-0.5 rounded uppercase font-bold">{t('chocoboColor.leftClick')}</span>
+                                <span className="text-[8px] text-[#666] bg-black/40 px-1.5 py-0.5 rounded uppercase font-bold">{t('chocoboColor.rightClick')}</span>
                               </div>
                             </div>
                             {isDone && (
@@ -494,11 +496,11 @@ export default function ChocoboColor() {
                       >
                         <div className="flex items-center justify-between mb-8">
                           <div className="space-y-1">
-                            <h4 className="text-sm font-bold text-white uppercase tracking-widest">建議餵食順序</h4>
-                            <p className="text-[10px] text-[#9e9e9e]">交替餵食可獲得更穩定的顏色變化，建議按照下方順序逐一餵食。</p>
+<h4 className="text-sm font-bold text-white uppercase tracking-widest">{t('chocoboColor.suggestedSequence')}</h4>
+                            <p className="text-[10px] text-[#9e9e9e]">{t('chocoboColor.sequenceTip')}</p>
                           </div>
                           <div className="px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full">
-                            <span className="text-[10px] text-amber-500 font-bold">共 {feedingOrder.length} 顆</span>
+                            <span className="text-[10px] text-amber-500 font-bold">{t('chocoboColor.totalFruit')} {feedingOrder.length} {t('chocoboColor.fruit')}</span>
                           </div>
                         </div>
                         
@@ -543,26 +545,26 @@ export default function ChocoboColor() {
         {/* Info Sidebar */}
         <div className="space-y-6">
           <div className="bg-amber-500/5 rounded-3xl p-6 border border-amber-500/10 space-y-4">
-            <h3 className="text-amber-500 font-bold flex items-center gap-2">
+<h3 className="text-amber-500 font-bold flex items-center gap-2">
               <Info size={18} />
-              餵食說明
+              {t('chocoboColor.feedingTip')}
             </h3>
             <ul className="space-y-3 text-sm text-[#9e9e9e] leading-relaxed">
-              <li className="flex gap-2">
+<li className="flex gap-2">
                 <span className="text-amber-500">•</span>
-                建議交替餵食不同水果，避免單一 RGB 值達到上限。
+                <span>{t('chocoboColor.capNote')}</span>
               </li>
               <li className="flex gap-2">
                 <span className="text-amber-500">•</span>
-                餵食後需等待 6 小時（地球時間）才能看到顏色變化。
+                <span>{t('chocoboColor.waitNote', { hours: t('chocoboColor.hours') })}</span>
               </li>
               <li className="flex gap-2">
                 <span className="text-amber-500">•</span>
-                當你看到「陸行鳥的羽毛正在生長新的羽毛」訊息時，表示顏色即將改變。
+                <span>{t('chocoboColor.feedingTipDesc')}</span>
               </li>
               <li className="flex gap-2">
                 <span className="text-amber-500">•</span>
-                若想恢復初始顏色，請餵食「拉札漢檸檬」。
+                <span>{t('chocoboColor.sequenceAction')}</span>
               </li>
             </ul>
           </div>

@@ -2,59 +2,67 @@
  * Central tool registry — single source of truth for all nav tools.
  * Icons are resolved in App.tsx via lucide-react imports.
  * If you add/remove/rename a tool, update this file AND the constants/tasks.ts.
+ *
+ * i18n: labels and descriptions are stored as i18n keys (e.g. 'tools.home.label').
+ * Render time resolution happens in Dashboard.tsx via useTranslation().
  */
 
-import { CheckSquare, Bell, Calendar, BookOpen, ShoppingCart, Map as MapIcon, Grid3X3, Bird, CloudSun, Clock, Settings, HelpCircle, History, Volume2 } from 'lucide-react';
+import { CheckSquare, Bell, Calendar, BookOpen, ShoppingCart, Map as MapIcon, Grid3X3, Bird, CloudSun, Clock, Settings, HelpCircle, History } from 'lucide-react';
 import { View } from '../types';
 
 export interface NavTool {
   id: View;
-  label: string;
+  label: string;       // i18n key, e.g. 'tools.home.label'
+  desc: string;        // i18n key, e.g. 'tools.home.desc'
   icon: React.ComponentType<{ size: number; className?: string }>;
   image: string;
-  desc: string;
   color: string;
 }
 
 export interface NavGroup {
-  label: string;
+  key: string;       // stable identifier e.g. 'daily', 'tools' — used for state keys
+  label: string;     // i18n key e.g. 'nav.daily'
   items: NavTool[];
 }
 
 export const NAV_GROUPS: NavGroup[] = [
   {
-    label: '日常任務',
+    key: 'daily',
+    label: 'nav.daily',
     items: [
-      { id: 'home',           label: '總覽',         icon: CheckSquare, image: '/tools/Dashboard.png',       desc: '快速掌握每日與每週任務進度。',                        color: 'bg-indigo-500' },
-      { id: 'checklist',      label: '任務進度',      icon: CheckSquare, image: '/tools/DutyChecklist.png',  desc: '追蹤每日與每週任務，確保不遺漏任何獎勵。',            color: 'bg-indigo-500' },
-      { id: 'alarm',          label: '自訂鬧鐘',      icon: Bell,        image: '/tools/SetAlarm.png',        desc: '設定各類遊戲內提醒，確保不錯過任何冒險節奏。',          color: 'bg-amber-500' },
-      { id: 'event-calendar', label: '活動行事曆',    icon: Calendar,   image: '/tools/EventCalendar.png',    desc: '管理 FC 或固定團的活動排程，快速查看接下來的行程。',      color: 'bg-rose-500' },
+      { id: 'home',           label: 'tools.home.label',       desc: 'tools.home.desc',       icon: CheckSquare,   image: '/tools/Dashboard.png',       color: 'bg-indigo-500' },
+      { id: 'checklist',      label: 'tools.checklist.label',  desc: 'tools.checklist.desc',  icon: CheckSquare,   image: '/tools/DutyChecklist.png',  color: 'bg-indigo-500' },
+      { id: 'alarm',          label: 'tools.alarm.label',      desc: 'tools.alarm.desc',      icon: Bell,         image: '/tools/SetAlarm.png',       color: 'bg-amber-500' },
+      { id: 'event-calendar', label: 'tools.calendar.label',   desc: 'tools.calendar.desc',   icon: Calendar,     image: '/tools/EventCalendar.png',  color: 'bg-rose-500' },
     ],
   },
   {
-    label: '實用工具',
+    key: 'tools',
+    label: 'nav.tools',
     items: [
-      { id: 'tails',      label: '庫洛天書',    icon: BookOpen,    image: '/tools/WondrousTails.png',  desc: '連線機率預測，視覺化模擬成功機率。',                        color: 'bg-blue-500' },
-      { id: 'market',     label: '市場查詢',    icon: ShoppingCart,image: '/tools/MarketBoard.png',    desc: '整合 Universalis API，即時查詢道具售價與交易紀錄。',       color: 'bg-rose-500' },
-      { id: 'treasure',   label: '藏寶搜尋',    icon: MapIcon,     image: '/tools/TreasureHunt.png',   desc: '對照藏寶圖碎片，快速定位寶藏位置。',                        color: 'bg-amber-500' },
-      { id: 'cactpot',    label: '仙人微彩',    icon: Grid3X3,     image: '/tools/MiniCactpot.png',    desc: '期望值計算器，協助選擇最高回報路線。',                      color: 'bg-amber-500' },
-      { id: 'chocobo',    label: '陸行鳥染色',  icon: Bird,        image: '/tools/ChocoboColor.png',   desc: '精確計算所需水果數量與餵食順序。',                          color: 'bg-amber-600' },
+      { id: 'tails',      label: 'tools.tails.label',    desc: 'tools.tails.desc',    icon: BookOpen,     image: '/tools/WondrousTails.png',  color: 'bg-blue-500' },
+      { id: 'market',     label: 'tools.market.label',   desc: 'tools.market.desc',   icon: ShoppingCart, image: '/tools/MarketBoard.png',  color: 'bg-rose-500' },
+      { id: 'treasure',   label: 'tools.treasure.label', desc: 'tools.treasure.desc', icon: MapIcon,      image: '/tools/TreasureHunt.png',  color: 'bg-amber-500' },
+      { id: 'cactpot',    label: 'tools.cactpot.label',  desc: 'tools.cactpot.desc',  icon: Grid3X3,     image: '/tools/MiniCactpot.png',   color: 'bg-amber-500' },
+      { id: 'chocobo',    label: 'tools.chocobo.label',  desc: 'tools.chocobo.desc',  icon: Bird,         image: '/tools/ChocoboColor.png',  color: 'bg-amber-600' },
     ],
   },
   {
-    label: '地圖與天氣',
+    key: 'weatherGroup',
+    label: 'nav.weatherGroup',
     items: [
-      { id: 'weather',          label: '天氣預報',    icon: CloudSun,  image: '/tools/Skywatcher.png',       desc: '全地圖天氣查詢，支援稀有天氣篩選級。',   color: 'bg-emerald-500' },
-      { id: 'interactive-maps', label: '互動地圖',    icon: MapIcon,   image: '/tools/InteractiveMaps.png',  desc: '探索艾歐澤亞的地理資訊，查看各區域的資源與標記。', color: 'bg-blue-500' },
-      { id: 'sightseeing',       label: '探索筆記',    icon: Clock,     image: '/tools/SightseeingLog.png',  desc: '整合時間與天氣，提示當前可完成目標。',   color: 'bg-blue-600' },
+      { id: 'weather',          label: 'tools.weather.label',    desc: 'tools.weather.desc',    icon: CloudSun, image: '/tools/Skywatcher.png',       color: 'bg-emerald-500' },
+      { id: 'interactive-maps', label: 'tools.maps.label',       desc: 'tools.maps.desc',       icon: MapIcon,  image: '/tools/InteractiveMaps.png',  color: 'bg-blue-500' },
+      { id: 'sightseeing',      label: 'tools.sightseeing.label', desc: 'tools.sightseeing.desc', icon: Clock, image: '/tools/SightseeingLog.png',  color: 'bg-blue-600' },
     ],
   },
   {
-    label: '其他資源',
+    key: 'other',
+    label: 'nav.other',
     items: [
-      { id: 'links',     label: '好用連結',   icon: Settings,   image: '/tools/UsefulLinks.png',    desc: '整理各類實用的影片與文字站點，快速找到資源。', color: 'bg-slate-600' },
-      { id: 'guide',     label: '導覽輔助',   icon: HelpCircle, image: '/tools/NavigationGuide.png',desc: '遊戲機制與系統說明，協助新手快速上手。',   color: 'bg-slate-600' },
-      { id: 'changelog', label: '更新日誌',   icon: History,    image: '/tools/Changelog.png',      desc: '記錄網站功能更新與維護歷程。',              color: 'bg-slate-600' },
+      { id: 'links',     label: 'tools.links.label',    desc: 'tools.links.desc',    icon: Settings,   image: '/tools/UsefulLinks.png',      color: 'bg-slate-600' },
+      { id: 'guide',     label: 'tools.guide.label',    desc: 'tools.guide.desc',   icon: HelpCircle, image: '/tools/NavigationGuide.png', color: 'bg-slate-600' },
+      { id: 'changelog', label: 'tools.changelog.label', desc: 'tools.changelog.desc', icon: History,  image: '/tools/Changelog.png',        color: 'bg-slate-600' },
     ],
   },
 ];

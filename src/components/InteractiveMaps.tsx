@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useRef, useState } from 'react';
 import { Map as MapIcon, Info, ExternalLink, Search } from 'lucide-react';
 
@@ -29,6 +30,7 @@ const MAP_LIST = [
 ];
 
 export default function InteractiveMaps() {
+  const { t } = useTranslation();
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const [selectedMapId, setSelectedMapId] = useState(92);
@@ -70,8 +72,8 @@ export default function InteractiveMaps() {
             <img src="/tools/InteractiveMaps.png" alt="Interactive Maps" className="w-6 h-6 object-contain" referrerPolicy="no-referrer" />
             <span className="text-xs font-bold uppercase tracking-widest">Interactive Maps</span>
           </div>
-          <h1 className="text-3xl font-bold text-white">艾歐澤亞互動地圖</h1>
-          <p className="text-[#9e9e9e] text-sm max-w-md">探索艾歐澤亞的地理資訊，查看各區域的資源與標記。</p>
+<h1 className="text-3xl font-bold text-white">{t('interactiveMaps.title')}</h1>
+          <p className="text-[#9e9e9e] text-sm max-w-md">{t('interactiveMaps.subtitle')}</p>
         </div>
       </header>
 
@@ -91,9 +93,9 @@ export default function InteractiveMaps() {
               <Info size={20} className="text-blue-500" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-white mb-1">地圖操作指南</h4>
+<h4 className="text-sm font-bold text-white mb-1">{t('interactiveMaps.操作指南')}</h4>
               <p className="text-xs text-[#9e9e9e] leading-relaxed">
-                使用滑鼠滾輪進行縮放，點擊並拖拽可移動地圖。點擊地圖上的標記以查看詳細內容。
+                {t('interactiveMaps.zoomTip')} {t('interactiveMaps.dragTip')} {t('interactiveMaps.markerTip')}
               </p>
             </div>
           </div>
@@ -103,10 +105,10 @@ export default function InteractiveMaps() {
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-blue-400">
                 <Info size={16} />
-                <span className="text-xs font-bold uppercase tracking-wider">資料來源</span>
+                <span className="text-xs font-bold uppercase tracking-wider">{t('interactiveMaps.dataSource')}</span>
               </div>
               <p className="text-xs text-[#9e9e9e] leading-relaxed">
-                互動地圖工具由 <span className="text-white font-medium">FFCafe 肥肥咖啡</span> 開發。
+                <span>{t('interactiveMaps.poweredBy')}</span>
               </p>
             </div>
             <a 
@@ -115,7 +117,7 @@ export default function InteractiveMaps() {
               rel="noopener noreferrer"
               className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors bg-blue-500/10 px-4 py-2 rounded-xl border border-blue-500/20"
             >
-              訪問官網 <ExternalLink size={12} />
+              {t('interactiveMaps.visitSite')} <ExternalLink size={12} />
             </a>
           </div>
         </div>

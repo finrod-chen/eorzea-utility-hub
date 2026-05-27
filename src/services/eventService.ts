@@ -16,6 +16,8 @@ interface CacheData {
 export const fetchOfficialEvents = async (): Promise<OfficialEvent[]> => {
   const n8nUrl = import.meta.env.VITE_N8N_EVENTS_URL;
   
+  const DEV = import.meta.env.DEV;
+
   // 1. Check Cache
   const cached = localStorage.getItem(CACHE_KEY);
   if (cached) {
@@ -23,27 +25,26 @@ export const fetchOfficialEvents = async (): Promise<OfficialEvent[]> => {
       const { timestamp, events }: CacheData = JSON.parse(cached);
       const now = Date.now();
       if (now - timestamp < CACHE_TTL) {
-        console.log('Using cached official events');
+        if (DEV) console.log('[eventService] Using cached official events');
         return events;
       }
     } catch (e) {
-      console.error('Failed to parse cached events', e);
+      if (DEV) console.error('[eventService] Failed to parse cached events', e);
     }
   }
 
   // 2. Fetch from Network
   if (n8nUrl) {
-    console.log('Attempting to fetch official events from:', n8nUrl);
+    if (DEV) console.log('[eventService] Fetching official events from:', n8nUrl);
     try {
       const response = await fetch(n8nUrl);
       if (response.ok) {
         const text = await response.text();
-        console.log('Fetch successful, response length:', text.length);
         if (text && text.trim() !== '') {
           try {
             const data = JSON.parse(text);
             if (Array.isArray(data)) {
-              console.log('Successfully parsed official events array');
+              if (DEV) console.log('[eventService] Fetched', data.length, 'official events');
               // Update Cache
               const cacheData: CacheData = {
                 timestamp: Date.now(),
@@ -52,22 +53,22 @@ export const fetchOfficialEvents = async (): Promise<OfficialEvent[]> => {
               localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
               return data;
             } else {
-              console.warn('Official events data is not an array:', data);
+              if (DEV) console.warn('[eventService] Official events data is not an array:', data);
             }
           } catch (parseError) {
-            console.error('Failed to parse official events JSON:', parseError);
+            if (DEV) console.error('[eventService] Failed to parse official events JSON:', parseError);
           }
         } else {
-          console.warn('Official events response was empty');
+          if (DEV) console.warn('[eventService] Official events response was empty');
         }
       } else {
-        console.error('Official events fetch failed with status:', response.status);
+        if (DEV) console.error('[eventService] Fetch failed with status:', response.status);
       }
     } catch (error) {
-      console.error('Failed to fetch official events (Network Error):', error);
+      if (DEV) console.error('[eventService] Network error:', error);
     }
   } else {
-    console.warn('VITE_N8N_EVENTS_URL is not defined in the environment');
+    if (DEV) console.warn('[eventService] VITE_N8N_EVENTS_URL is not defined');
   }
 
   // 3. Fallback — return empty array instead of stale hardcoded data

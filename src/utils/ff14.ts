@@ -1,6 +1,7 @@
 /**
  * Final Fantasy XIV Utility Logic
  */
+import i18n from '../i18n';
 
 // Eorzea Time
 // 1 Eorzea Day  = 1440 ET minutes = 70 real minutes
@@ -61,7 +62,7 @@ export interface WondrousTailsResult {
 
 export function calculateWondrousTailsProbabilities(stickerCount: number): WondrousTailsResult {
   const TOTAL_CELLS = 9;
-  const TOTAL_LINES = 9;
+  const TOTAL_LINES = 8; // 3 rows + 3 cols + 2 diagonals
   const SIMULATIONS = 100_000;
 
   if (stickerCount < 1 || stickerCount > 9) {
@@ -122,64 +123,22 @@ export function calculateWondrousTailsProbabilities(stickerCount: number): Wondr
 }
 
 // --- Weather Translation ---
+// Keys stored in i18n as weather.Clear_Skies, weather.Fog, etc.
 export function translateWeather(weather: string): string {
-  const translations: Record<string, string> = {
-    "Clear Skies": "碧空",
-    "Fair Skies": "晴朗",
-    "Clouds": "陰雲",
-    "Fog": "薄霧",
-    "Rain": "小雨",
-    "Showers": "暴雨",
-    "Dust Storms": "揚沙",
-    "Sandstorms": "流沙",
-    "Thunder": "打雷",
-    "Thunderstorms": "雷雨",
-    "Snow": "小雪",
-    "Blizzards": "暴雪",
-    "Gloom": "妖霧",
-    "Heat Waves": "熱浪",
-    "Wind": "微風",
-    "Gales": "強風",
-    "Tension": "靈風",
-    "Umbral Static": "靈極電",
-    "Umbral Wind": "靈極風",
-    "Moon Dust": "月塵",
-    "Astromagnetic Storm": "宇宙磁暴",
-    "Any": "任何"
-  };
-  return translations[weather] || weather;
+  const key = `weather.${weather.replace(/ /g, '_')}`;
+  return i18n.t(key, { defaultValue: weather });
 }
 
 // --- Region Translation ---
+// Keys stored in i18n as region.la-noscea, region.shroud, etc.
 export function translateRegion(region: string): string {
-  const translations: Record<string, string> = {
-    'la-noscea': '拉諾西亞',
-    'shroud': '黑衣森林',
-    'thanalan': '薩納蘭',
-    'mor-dhona': '摩杜納',
-    'coerthas': '庫爾札斯',
-    'dravania': '龍堡',
-    'abalathia': '阿巴拉提亞',
-    'gyr-abania': '基拉巴尼亞',
-    'othard': '奧薩德',
-    'norvrandt': '諾弗蘭特',
-    'ilsabard': '伊爾薩巴德',
-    'the-sea-of-stars': '星海',
-    'the-world-unsundered': '未分斷世界',
-    'tural': '圖拉爾'
-  };
-  return translations[region] || region;
+  return i18n.t(`region.${region}`, { defaultValue: region });
 }
 
 // --- Emote Translation ---
+// Strip leading slash and trailing whitespace before lookup.
+// Keys stored in i18n as emote.lookout, emote.pray, etc.
 export function translateEmote(emote: string): string {
-  const translations: Record<string, string> = {
-    "/lookout": "張望",
-    "/pray": "祈禱",
-    "/sit": "坐下",
-    "/comfort": "安撫",
-    "/pray ": "祈禱",
-    "Any": "任何"
-  };
-  return translations[emote] || emote;
+  const key = emote.trim().replace(/^\//, '');
+  return i18n.t(`emote.${key}`, { defaultValue: emote.trim() });
 }

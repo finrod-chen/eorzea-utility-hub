@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { BookOpen, Info, RotateCcw } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 
 const LINES = [
   // Rows
@@ -39,6 +40,7 @@ function getCombinations(arr: number[], k: number): number[][] {
 }
 
 export default function WondrousTails() {
+  const { t } = useTranslation();
   const [stickers, setStickers] = useState<boolean[]>(Array(16).fill(false));
 
   const stickerCount = stickers.filter(s => s).length;
@@ -89,8 +91,8 @@ export default function WondrousTails() {
           <img src="/tools/WondrousTails.png" alt="" className="w-5 h-5 object-contain" referrerPolicy="no-referrer" />
           <span className="text-xs font-bold uppercase tracking-widest">Wondrous Tails</span>
         </div>
-        <h1 className="text-3xl font-bold text-white">庫洛天書機率預測</h1>
-        <p className="text-[#9e9e9e] text-sm max-w-md">點擊格子標記您的印花位置，我們將計算達成 1/2/3 條連線的剩餘機率。</p>
+<h1 className="text-3xl font-bold text-white">{t('tails.title')}</h1>
+        <p className="text-[#9e9e9e] text-sm max-w-md">{t('tails.subtitle')}</p>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -137,16 +139,16 @@ export default function WondrousTails() {
                   }}
                   disabled={stickerCount < 3 || stickerCount > 7}
                   className="px-6 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 rounded-xl text-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2"
-                  title="消耗 2 點奇想點洗牌 (3-7 枚印花時可用)"
+title={t('tails.shuffleTitle')}
                 >
                   <RotateCcw size={14} />
-                  洗牌
+                  {t('tails.shuffle')}
                 </button>
                 <button 
-                  onClick={() => setStickers(Array(16).fill(false))}
+onClick={() => setStickers(Array(16).fill(false))}
                   className="px-6 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-sm transition-colors"
                 >
-                  重置印花
+                  {t('tails.reset')}
                 </button>
               </div>
             </div>
@@ -158,10 +160,10 @@ export default function WondrousTails() {
             <h3 className="text-sm font-bold text-[#00B0FF] uppercase tracking-widest">Probability Analysis</h3>
             
             <div className="space-y-6">
-              {[
-                { label: '1 條線', prob: probabilities[1], color: 'bg-emerald-500' },
-                { label: '2 條線', prob: probabilities[2], color: 'bg-blue-500' },
-                { label: '3 條線', prob: probabilities[3], color: 'bg-amber-500' },
+{[
+                { label: t('tails.line1'), prob: probabilities[1], color: 'bg-emerald-500' },
+                { label: t('tails.line2'), prob: probabilities[2], color: 'bg-blue-500' },
+                { label: t('tails.line3'), prob: probabilities[3], color: 'bg-amber-500' },
               ].map((item, i) => (
                 <div key={i} className="space-y-2">
                   <div className="flex justify-between text-sm">
@@ -181,9 +183,9 @@ export default function WondrousTails() {
               ))}
             </div>
 
-            <div className="pt-4 border-t border-white/5 flex gap-3 text-xs text-[#9e9e9e] leading-relaxed">
+<div className="pt-4 border-t border-white/5 flex gap-3 text-xs text-[#9e9e9e] leading-relaxed">
               <Info size={16} className="shrink-0 text-[#00B0FF]" />
-              <p>機率計算基於剩餘印花隨機落點的模擬結果。建議在 7 枚印花後使用洗牌功能優化佈局。</p>
+              <p>{t('tails.probNote')}</p>
             </div>
           </div>
         </div>
