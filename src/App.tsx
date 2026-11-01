@@ -60,7 +60,14 @@ export default function App() {
   const [currentView, setCurrentView] = useState<View>('home');
   const [events, setEvents] = useState<CalendarEvent[]>(() => {
     const saved = localStorage.getItem('ff14-events');
-    return saved ? JSON.parse(saved) : [];
+    if (!saved) return [];
+    try {
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      console.warn('[App] Failed to parse saved events, starting fresh:', e);
+      return [];
+    }
   });
 
   const [alarms, setAlarms] = useState<Alarm[]>(() => {
@@ -218,7 +225,7 @@ export default function App() {
       case 'links': return <UsefulLinks />;
       case 'changelog': return <Changelog />;
       case 'guide': return <NavigationGuide onViewChange={setCurrentView} />;
-      default: return <Dashboard et={et} onViewChange={setCurrentView} events={events} />;
+      default: return <Dashboard et={et} onViewChange={setCurrentView} events={events} officialEvents={officialEvents} />;
     }
   };
 

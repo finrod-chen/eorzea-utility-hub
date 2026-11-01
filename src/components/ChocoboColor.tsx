@@ -33,6 +33,8 @@ interface ColorSelectorProps {
 }
 
 function ColorSelector({ label, selectedId, onSelect, colors }: ColorSelectorProps) {
+  const { t, i18n } = useTranslation();
+  const nameOf = (c: Color) => (i18n.language === 'zh-TW' ? c.names.zh : c.names.en);
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   
@@ -70,7 +72,7 @@ function ColorSelector({ label, selectedId, onSelect, colors }: ColorSelectorPro
               style={{ backgroundColor: selectedColor ? `rgb(${selectedColor.rgb.join(',')})` : 'transparent' }}
             />
             <div className="flex flex-col">
-              <span className="text-white font-bold">{selectedColor?.names.zh || t('chocoboColor.selectColor')}</span>
+              <span className="text-white font-bold">{(selectedColor && nameOf(selectedColor)) || t('chocoboColor.selectColor')}</span>
               <span className="text-[10px] text-[#9e9e9e] font-mono uppercase tracking-tighter">{selectedColor?.id}</span>
             </div>
           </div>
@@ -126,7 +128,7 @@ function ColorSelector({ label, selectedId, onSelect, colors }: ColorSelectorPro
                                 onSelect(id);
                                 setIsOpen(false);
                               }}
-                              title={color.names.zh}
+                              title={nameOf(color)}
                               className={`w-9 h-9 rounded-xl border-2 transition-all duration-300 hover:scale-110 hover:shadow-lg active:scale-95 ${isSelected ? 'border-amber-500 ring-4 ring-amber-500/20 scale-110' : 'border-white/10 hover:border-white/30'}`}
                               style={{ backgroundColor: `rgb(${color.rgb.join(',')})` }}
                             />
@@ -154,7 +156,7 @@ function ColorSelector({ label, selectedId, onSelect, colors }: ColorSelectorPro
                             style={{ backgroundColor: `rgb(${color.rgb.join(',')})` }}
                           />
                           <div className="flex-1 text-left">
-                            <p className={`text-sm font-bold transition-colors ${selectedId === color.id ? 'text-amber-500' : 'text-white'}`}>{color.names.zh}</p>
+                            <p className={`text-sm font-bold transition-colors ${selectedId === color.id ? 'text-amber-500' : 'text-white'}`}>{nameOf(color)}</p>
                             <p className="text-[10px] text-[#666] font-mono group-hover:text-[#9e9e9e] transition-colors">{color.names.en}</p>
                           </div>
                           {selectedId === color.id ? (
