@@ -5,7 +5,7 @@ import { ArrowRight, Bird, Calendar, CloudSun, Clock, ExternalLink, Map as MapIc
 import { CalendarEvent } from './EventCalendar';
 import ResetCountdown from './ResetCountdown';
 import { INITIAL_TASKS } from '../constants/tasks';
-import { getProgress } from '../utils/taskUtils';
+import { getProgress, pruneExpired } from '../utils/taskUtils';
 import { NAV_GROUPS } from '../constants/tools';
 import { View } from '../types';
 import KoFiWidget from './KoFiWidget';
@@ -80,11 +80,12 @@ function TiltCard({ tool, onClick }: TiltCardProps) {
 
 interface DashboardProps {
   et: { hours: number; minutes: number };
+  now: Date;
   onViewChange: (view: View) => void;
   events: CalendarEvent[];
   officialEvents: OfficialEvent[];
 }
-export default function Dashboard({ et, onViewChange, events, officialEvents }: DashboardProps) {
+export default function Dashboard({ et, now, onViewChange, events, officialEvents }: DashboardProps) {
   const { t, i18n } = useTranslation();
   const [progress, setProgress] = useState({
     daily: { done: 0, total: 0 },
@@ -117,7 +118,7 @@ export default function Dashboard({ et, onViewChange, events, officialEvents }: 
     const saved = localStorage.getItem('ff14-duty-checklist-v2');
     if (saved) {
       try {
-        const completed = JSON.parse(saved);
+        const completed = pruneExpired(JSON.parse(saved));
         setProgress({
           daily: getProgress(completed, 'daily'),
           weekly: getProgress(completed, 'weekly'),
@@ -233,7 +234,7 @@ export default function Dashboard({ et, onViewChange, events, officialEvents }: 
       </div>
 
       {/* Reset Countdowns */}
-      <ResetCountdown dailyProgress={progress.daily} weeklyProgress={progress.weekly} />
+      <ResetCountdown now={now} dailyProgress={progress.daily} weeklyProgress={progress.weekly} />
 
       {/* Support / Ko-fi */}
       <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-5 flex items-center justify-between gap-4">

@@ -188,7 +188,7 @@ function ColorSelector({ label, selectedId, onSelect, colors }: ColorSelectorPro
 }
 
 export default function ChocoboColor() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [currentColorId, setCurrentColorId] = useState(chocoboData.meta.defaultColor);
   const [targetColorId, setTargetColorId] = useState('snow-white');
   const [showOrder, setShowOrder] = useState(false);
@@ -437,7 +437,7 @@ export default function ChocoboColor() {
                               {fruitIcons[fruit.id] ? (
                                 <img 
                                   src={fruitIcons[fruit.id]} 
-                                  alt={fruit.names.zh} 
+                                  alt={(i18n.language === 'zh-TW' ? fruit.names.zh : fruit.names.en)} 
                                   className="w-12 h-12 object-contain drop-shadow-lg relative z-10 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300"
                                   referrerPolicy="no-referrer"
                                 />
@@ -459,7 +459,7 @@ export default function ChocoboColor() {
                               )}
                             </div>
                             <div className="flex-1">
-                              <p className={`text-sm font-bold transition-colors ${isDone ? 'text-emerald-500' : 'text-white group-hover:text-amber-500'}`}>{fruit.names.zh}</p>
+                              <p className={`text-sm font-bold transition-colors ${isDone ? 'text-emerald-500' : 'text-white group-hover:text-amber-500'}`}>{(i18n.language === 'zh-TW' ? fruit.names.zh : fruit.names.en)}</p>
                               <div className="flex items-center gap-2 mt-1">
                                 <p className="text-xs text-[#9e9e9e]">
                                   {t('chocoboColor.progress')}: <span className={`font-mono font-bold text-base ml-1 transition-colors ${isDone ? 'text-emerald-500' : 'text-amber-500 group-hover:text-amber-400'}`}>{fedCount}</span> / {count}
@@ -531,7 +531,7 @@ export default function ChocoboColor() {
                                   style={{ backgroundColor: fruit.color }}
                                 />
                               )}
-                              <span className="text-[11px] font-bold text-white line-clamp-1">{fruit.names.zh}</span>
+                              <span className="text-[11px] font-bold text-white line-clamp-1">{(i18n.language === 'zh-TW' ? fruit.names.zh : fruit.names.en)}</span>
                             </motion.div>
                           ))}
                         </div>
