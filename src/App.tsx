@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -31,27 +31,30 @@ import { Toaster, toast } from 'sonner';
 import { getEorzeaTime } from './utils/ff14';
 import { fetchOfficialEvents, OfficialEvent } from './services/eventService';
 
-// Components
-import MiniCactpot from './components/MiniCactpot';
-import WondrousTails from './components/WondrousTails';
-import Skywatcher from './components/Skywatcher';
-import SightseeingLog from './components/SightseeingLog';
+// Components — Dashboard is eager (landing page); every other view is lazy-loaded
 import Dashboard from './components/Dashboard';
-import Changelog from './components/Changelog';
-import ChocoboColor from './components/ChocoboColor';
-import DutyChecklist from './components/DutyChecklist';
-import NavigationGuide from './components/NavigationGuide';
-import MarketBoard from './components/MarketBoard';
-import UsefulLinks from './components/UsefulLinks';
-import TreasureHunt from './components/TreasureHunt';
-import EventCalendar, { CalendarEvent } from './components/EventCalendar';
-import SetAlarm from './components/SetAlarm';
-import InteractiveMaps from './components/InteractiveMaps';
+import type { CalendarEvent } from './components/EventCalendar';
+const MiniCactpot = lazy(() => import('./components/MiniCactpot'));
+const WondrousTails = lazy(() => import('./components/WondrousTails'));
+const Skywatcher = lazy(() => import('./components/Skywatcher'));
+const SightseeingLog = lazy(() => import('./components/SightseeingLog'));
+const Changelog = lazy(() => import('./components/Changelog'));
+const ChocoboColor = lazy(() => import('./components/ChocoboColor'));
+const DutyChecklist = lazy(() => import('./components/DutyChecklist'));
+const NavigationGuide = lazy(() => import('./components/NavigationGuide'));
+const MarketBoard = lazy(() => import('./components/MarketBoard'));
+const UsefulLinks = lazy(() => import('./components/UsefulLinks'));
+const TreasureHunt = lazy(() => import('./components/TreasureHunt'));
+const EventCalendar = lazy(() => import('./components/EventCalendar'));
+const SetAlarm = lazy(() => import('./components/SetAlarm'));
+const InteractiveMaps = lazy(() => import('./components/InteractiveMaps'));
 
 import KoFiWidget from './components/KoFiWidget';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import DataBackup from './components/DataBackup';
 import { Alarm, EorzeaTime, View } from './types';
 import { NAV_GROUPS } from './constants/tools';
+import { version as appVersion } from '../package.json';
 
 export default function App() {
   // ── i18n (declared first so effects below can reference `t`) ────────────
@@ -60,7 +63,14 @@ export default function App() {
   const [currentView, setCurrentView] = useState<View>('home');
   const [events, setEvents] = useState<CalendarEvent[]>(() => {
     const saved = localStorage.getItem('ff14-events');
-    return saved ? JSON.parse(saved) : [];
+    if (!saved) return [];
+    try {
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      console.warn('[App] Failed to parse saved events, starting fresh:', e);
+      return [];
+    }
   });
 
   const [alarms, setAlarms] = useState<Alarm[]>(() => {
@@ -91,7 +101,6 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [now, setNow] = useState(new Date());
-  const [et, setEt] = useState<EorzeaTime>(getEorzeaTime());
   const [officialEvents, setOfficialEvents] = useState<OfficialEvent[]>([]);
 
   // ── Clock tick (single source of truth) ──────────────────────────────────
@@ -103,7 +112,7 @@ export default function App() {
   }, []);
 
   // ── Derive ET from now ────────────────────────────────────────────────────
-  useEffect(() => { setEt(getEorzeaTime(now)); }, [now]);
+  const et: EorzeaTime = useMemo(() => getEorzeaTime(now), [now]);
 
   // ── Official events (single fetch, shared by Dashboard + EventCalendar) ──
   useEffect(() => {
@@ -203,14 +212,14 @@ export default function App() {
 
   const renderView = () => {
     switch (currentView) {
-      case 'home': return <Dashboard et={et} onViewChange={setCurrentView} events={events} officialEvents={officialEvents} />;
+      case 'home': return <Dashboard et={et} now={now} onViewChange={setCurrentView} events={events} officialEvents={officialEvents} />;
       case 'checklist': return <DutyChecklist />;
       case 'market': return <MarketBoard />;
       case 'alarm': return <SetAlarm alarms={alarms} setAlarms={setAlarms} now={now} />;
       case 'event-calendar': return <EventCalendar events={events} setEvents={setEvents} officialEvents={mappedOfficialEvents} />;
       case 'cactpot': return <MiniCactpot />;
       case 'tails': return <WondrousTails />;
-      case 'weather': return <Skywatcher et={et} />;
+      case 'weather': return <Skywatcher et={et} now={now} />;
       case 'interactive-maps': return <InteractiveMaps />;
       case 'treasure': return <TreasureHunt />;
       case 'chocobo': return <ChocoboColor />;
@@ -218,7 +227,7 @@ export default function App() {
       case 'links': return <UsefulLinks />;
       case 'changelog': return <Changelog />;
       case 'guide': return <NavigationGuide onViewChange={setCurrentView} />;
-      default: return <Dashboard et={et} onViewChange={setCurrentView} events={events} />;
+      default: return <Dashboard et={et} now={now} onViewChange={setCurrentView} events={events} officialEvents={officialEvents} />;
     }
   };
 
@@ -257,7 +266,7 @@ export default function App() {
               <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-xl shadow-lg shadow-[var(--color-accent-glow)]" referrerPolicy="no-referrer" />
               <div>
                 <h1 className="font-display font-bold text-lg tracking-tight text-white leading-tight">{t('nav.appName')}</h1>
-                <p className="text-[10px] uppercase tracking-widest text-[var(--color-accent)] font-semibold font-sans">Utility Hub V1.9.0</p>
+                <p className="text-[10px] uppercase tracking-widest text-[var(--color-accent)] font-semibold font-sans">Utility Hub V{appVersion}</p>
               </div>
             </button>
 
@@ -340,6 +349,7 @@ export default function App() {
                   </p>
                 </div>
               </div>
+              <DataBackup />
               <div className="kofi-widget-wrapper">
                 <KoFiWidget />
               </div>
@@ -369,7 +379,9 @@ export default function App() {
               transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
               className="p-6 lg:p-10 max-w-7xl mx-auto"
             >
-              {renderView()}
+              <Suspense fallback={<div className="py-24 text-center text-[var(--color-text-muted)] text-sm">{t('common.loading', { defaultValue: 'Loading…' })}</div>}>
+                {renderView()}
+              </Suspense>
             </motion.div>
           </AnimatePresence>
           {/* Back to Top Button — only visible after scrolling 200 px */}

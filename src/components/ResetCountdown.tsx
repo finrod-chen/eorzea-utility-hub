@@ -1,101 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { getNextReset, getNextLevequestReset, getNextOceanFishing, formatCountdown as fmt } from '../utils/resets';
 import { Clock, Calendar, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 
 interface ResetCountdownProps {
+  now: Date;
   dailyProgress?: { done: number; total: number };
   weeklyProgress?: { done: number; total: number };
 }
 
-export default function ResetCountdown({ dailyProgress, weeklyProgress }: ResetCountdownProps) {
+export default function ResetCountdown({ now, dailyProgress, weeklyProgress }: ResetCountdownProps) {
   const { t } = useTranslation();
-  const [now, setNow] = useState(new Date());
+  const formatCountdown = (target: Date) => fmt(target, now);
 
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const getDailyReset = () => {
-    // Daily reset at 23:00 GMT+8
-    const reset = new Date(now);
-    reset.setUTCHours(15, 0, 0, 0); // 15:00 UTC is 23:00 GMT+8
-    if (now > reset) {
-      reset.setUTCDate(reset.getUTCDate() + 1);
-    }
-    return reset;
-  };
-
-  const getWeeklyReset = () => {
-    // Weekly reset at Tuesday 16:00 GMT+8 (08:00 UTC)
-    const reset = new Date(now);
-    reset.setUTCHours(8, 0, 0, 0);
-    
-    // Day 2 is Tuesday
-    const currentDay = reset.getUTCDay();
-    let daysUntilTuesday = (2 - currentDay + 7) % 7;
-    
-    if (daysUntilTuesday === 0 && now > reset) {
-      daysUntilTuesday = 7;
-    }
-    
-    reset.setUTCDate(reset.getUTCDate() + daysUntilTuesday);
-    return reset;
-  };
-
-  const formatCountdown = (target: Date) => {
-    const diff = target.getTime() - now.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    
-    const parts = [];
-    if (hours > 0) parts.push(`${hours}h`);
-    parts.push(`${minutes}m`);
-    parts.push(`${seconds}s`);
-    
-    return parts.join(' ');
-  };
-
-  const getLevequestReset = () => {
-    // Levequest allowance restoration at 08:00 and 20:00 GMT+8
-    const nowGmt8 = new Date(now.getTime() + (8 * 60 * 60 * 1000));
-    const reset1 = new Date(nowGmt8);
-    reset1.setUTCHours(8, 0, 0, 0);
-    const reset2 = new Date(nowGmt8);
-    reset2.setUTCHours(20, 0, 0, 0);
-    
-    let nextReset = reset1;
-    if (nowGmt8 >= reset1 && nowGmt8 < reset2) {
-      nextReset = reset2;
-    } else if (nowGmt8 >= reset2) {
-      nextReset = new Date(reset1.getTime() + 24 * 60 * 60 * 1000);
-    }
-    
-    // Convert back to local time (or just return the target time)
-    return new Date(nextReset.getTime() - (8 * 60 * 60 * 1000));
-  };
-
-  const getOceanFishingDeparture = () => {
-    // Ocean fishing departs every 2 hours (00:00, 02:00, ..., 22:00 GMT+8)
-    const nowGmt8 = new Date(now.getTime() + (8 * 60 * 60 * 1000));
-    const hour = nowGmt8.getUTCHours();
-    const nextDepartureHour = (Math.floor(hour / 2) + 1) * 2;
-    
-    const departure = new Date(nowGmt8);
-    departure.setUTCHours(nextDepartureHour % 24, 0, 0, 0);
-    if (nextDepartureHour >= 24) {
-      departure.setUTCDate(departure.getUTCDate() + 1);
-    }
-    
-    return new Date(departure.getTime() - (8 * 60 * 60 * 1000));
-  };
-
-  const dailyReset = getDailyReset();
-  const weeklyReset = getWeeklyReset();
-  const levequestReset = getLevequestReset();
-  const oceanFishingDeparture = getOceanFishingDeparture();
+  const dailyReset = getNextReset('daily', now);
+  const weeklyReset = getNextReset('weekly', now);
+  const levequestReset = getNextLevequestReset(now);
+  const oceanFishingDeparture = getNextOceanFishing(now);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

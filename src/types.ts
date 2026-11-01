@@ -11,6 +11,7 @@ export interface Alarm {
 export interface EorzeaTime {
   hours: number;
   minutes: number;
+  totalHours: number;
 }
 
 export type View =

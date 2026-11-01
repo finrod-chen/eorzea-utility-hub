@@ -3,7 +3,7 @@ import { CheckSquare, Calendar, Clock, RotateCcw, Info, Star, ChevronDown, Chevr
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { INITIAL_TASKS } from '../constants/tasks';
-import { formatTimestamp } from '../utils/taskUtils';
+import { formatTimestamp, pruneExpired } from '../utils/taskUtils';
 
 export default function DutyChecklist() {
   const { t, i18n } = useTranslation();
@@ -16,7 +16,7 @@ export default function DutyChecklist() {
     const saved = localStorage.getItem('ff14-duty-checklist-v2');
     if (saved) {
       try {
-        setCompleted(JSON.parse(saved));
+        setCompleted(pruneExpired(JSON.parse(saved)));
       } catch (e) {
         console.warn('[DutyChecklist] Failed to load checklist v2, starting fresh:', e);
       }
@@ -30,13 +30,24 @@ export default function DutyChecklist() {
           Object.keys(oldData).forEach(key => {
             if (oldData[key]) newData[key] = new Date().toISOString();
           });
-          setCompleted(newData);
+          setCompleted(pruneExpired(newData));
         } catch (e) {
           console.warn('[DutyChecklist] Migration from v1 failed, starting fresh:', e);
         }
       }
     }
     setIsLoaded(true);
+  }, []);
+
+  // Auto-clear tasks once their server reset passes (checked every 30 s)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCompleted(prev => {
+        const next = pruneExpired(prev);
+        return Object.keys(next).length === Object.keys(prev).filter(k => prev[k]).length ? prev : next;
+      });
+    }, 30_000);
+    return () => clearInterval(timer);
   }, []);
 
   // Save state

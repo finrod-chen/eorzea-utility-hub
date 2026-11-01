@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Search, MapPin, TrendingUp, History, ExternalLink, Loader2, AlertCircle, ShoppingCart, Globe, Star, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import itemsIndex from '../data/items-index.json';
+import MarketWatchlist from './MarketWatchlist';
 
 interface MarketItem {
   itemID: number;
@@ -550,6 +551,14 @@ export default function MarketBoard() {
 
         {/* Results Panel */}
         <div className="lg:col-span-2 space-y-6">
+          {selectedItem && favorites.length > 0 && !isLoadingData && (
+            <button
+              onClick={() => { setSelectedItem(null); setMarketData(null); setError(null); }}
+              className="mb-4 flex items-center gap-2 text-xs text-[#D39E47] hover:underline"
+            >
+              <Star size={12} className="fill-current" /> {t('marketBoard.watchlist.back')}
+            </button>
+          )}
           <AnimatePresence mode="wait">
             {isLoadingData ? (
               <motion.div
@@ -708,6 +717,21 @@ export default function MarketBoard() {
                     {t('marketBoard.viewFull')} <ExternalLink size={12} />
                   </a>
                 </div>
+              </motion.div>
+            ) : favorites.length > 0 ? (
+              <motion.div key="watchlist" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <MarketWatchlist
+                  items={favorites.map(f => ({ id: getItemId(f), name: getItemName(f), icon: getItemIcon(f) }))}
+                  location={
+                    DATA_CENTERS.find(dc => dc.name === selectedDC)?.servers.find(sv => sv.name === selectedWorld)?.api
+                    ?? DATA_CENTERS.find(dc => dc.name === selectedDC)?.api
+                    ?? '陸行鳥'
+                  }
+                  onSelect={(id) => {
+                    const fav = favorites.find(f => getItemId(f) === id);
+                    if (fav) fetchMarketData(fav);
+                  }}
+                />
               </motion.div>
             ) : (
               <motion.div 

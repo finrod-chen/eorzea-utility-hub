@@ -1,12 +1,25 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Clock, CheckCircle2, Circle, MapPin, Info, Filter, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { SIGHTSEEING_LOGS, MAPS } from '../data/ff14Data';
 import { translateWeather, translateEmote, calculateWeatherSeed } from '../utils/ff14';
+import type { EorzeaTime } from '../types';
 
-export default function SightseeingLog({ et }: { et: any }) {
+export default function SightseeingLog({ et }: { et: EorzeaTime }) {
   const { t } = useTranslation();
-  const [completed, setCompleted] = useState<string[]>([]);
+  const [completed, setCompleted] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('ff14-sightseeing-completed');
+      const parsed = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('ff14-sightseeing-completed', JSON.stringify(completed));
+  }, [completed]);
   const [selectedVersion, setSelectedVersion] = useState<string>('All');
   const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
   const [sortBy, setSortBy] = useState<'id' | 'version' | 'map'>('id');

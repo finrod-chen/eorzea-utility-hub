@@ -5,6 +5,20 @@ import { motion } from 'motion/react';
 
 const updates = [
   {
+    version: 'v1.10.0',
+    date: '2026-11-01',
+    title: '自動重置、資料備份與繁中服 7.25',
+    items: [
+      { type: 'feature', text: '任務進度會在每日 23:00、軍票/蠻族 04:00、每週二 16:00（GMT+8）重置後自動清除打勾。' },
+      { type: 'feature', text: '新增資料匯出/匯入，可把任務、鬧鐘、行事曆、收藏等資料搬到其他瀏覽器。' },
+      { type: 'feature', text: '天氣預報每個時段顯示本地時間與開始/結束倒數。' },
+      { type: 'feature', text: '市場查詢新增常用清單價格總覽，一次比較收藏道具的最低價與成交量。' },
+      { type: 'improvement', text: '首頁版本資訊更新為繁中服 7.25（7.2「探究永久之人」）。' },
+      { type: 'improvement', text: '官方活動改由 GitHub Actions 定時擷取，網站直接讀取靜態資料。' },
+      { type: 'improvement', text: '修正陸行鳥染色選單會導致頁面錯誤的問題，並拆分各頁程式碼加快首頁載入。' }
+    ]
+  },
+  {
     version: 'v1.9.0',
     date: '2026-03-31',
     title: '互動地圖與市場查詢優化',
