@@ -80,6 +80,7 @@ npm run check   # 型別檢查 + 單元測試 + 建置
 ## 🔄 維護說明
 - **繁中服版本**：改 `src/constants/patch.ts` 即可更新首頁「繁中服目前版本」卡片（可放橫幅圖到 `public/patch/` 並設定 `image`）。
 - **官方活動**：`.github/workflows/official-events.yml` 每天兩次執行 `scripts/fetch-official-events.ts`，把結果寫入 `public/data/official-events.json`（有變動才 commit）。預設來源是官網「活動公告」列表（`news_list.aspx?category=1`），可用 Actions variables `EVENTS_LIST_URL` 覆寫；`EVENTS_FEED_URL`（RSS）為選用備援。也可在 Actions 頁面手動執行。
+- **部署**：`.github/workflows/deploy.yml` 在 main 有新 commit（或官方活動資料更新）時，建置並上傳到 Cloudflare Pages 專案 `eorzea-utility-hub`。需要在 repo 設定 secrets `CLOUDFLARE_API_TOKEN`（權限：Cloudflare Pages Edit）與 `CLOUDFLARE_ACCOUNT_ID`。
 - 舊的 n8n webhook（`VITE_N8N_EVENTS_URL`）仍可作為第二來源。
 
 ## 📜 版權聲明
