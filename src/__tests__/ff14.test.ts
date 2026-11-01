@@ -64,3 +64,18 @@ describe('weather windows in real time', () => {
     expect(etHourToRealDate(start + 8).getTime() - etHourToRealDate(start).getTime()).toBe(1400_000);
   });
 });
+
+describe('map coordinate → image position', () => {
+  it('maps 1..42 to 0..100% on SizeFactor 100 maps', async () => {
+    const { CoordinateUtils } = await import('../utils/coordinateUtils');
+    expect(CoordinateUtils.gameToImageCoords(1, 42)).toEqual({ x: 0, y: 100 });
+    expect(CoordinateUtils.gameToImageCoords(21.5, 21.5).x).toBeCloseTo(50);
+  });
+  it('uses the smaller scale on Heavensward (SizeFactor 95) maps', async () => {
+    const { CoordinateUtils } = await import('../utils/coordinateUtils');
+    expect(CoordinateUtils.sizeFactorFor('theseaofclouds')).toBe(95);
+    expect(CoordinateUtils.sizeFactorFor('urqopacha')).toBe(100);
+    // the far edge of a 95 map is ~44.16, which must land at 100%
+    expect(CoordinateUtils.gameToImageCoords(1 + 41 / 0.95, 1, 95).x).toBeCloseTo(100);
+  });
+});
