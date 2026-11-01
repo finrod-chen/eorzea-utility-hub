@@ -1,76 +1,55 @@
-export interface OfficialEvent {
-  eventid: string;
-  title: string;
-  url: string;
-  date?: string;
-}
+import { normalizeEventsPayload, OfficialEvent } from './officialEventsParser';
+
+export type { OfficialEvent };
 
 const CACHE_KEY = 'ff14-official-events-cache';
-const CACHE_TTL = 60 * 60 * 1000; // 60 minutes
+const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
 
 interface CacheData {
   timestamp: number;
   events: OfficialEvent[];
 }
 
+/**
+ * Sources, in order:
+ *  1. Static JSON committed by the "Update official events" GitHub Action (same origin, no CORS).
+ *  2. Optional VITE_N8N_EVENTS_URL webhook (legacy).
+ */
+function sources(): string[] {
+  const list = [`${import.meta.env.BASE_URL}data/official-events.json`];
+  const n8n = import.meta.env.VITE_N8N_EVENTS_URL;
+  if (n8n) list.push(n8n);
+  return list;
+}
+
+async function tryFetch(url: string): Promise<OfficialEvent[] | null> {
+  try {
+    const res = await fetch(url, { cache: 'no-cache' });
+    if (!res.ok) return null;
+    const text = await res.text();
+    if (!text.trim()) return null;
+    return normalizeEventsPayload(JSON.parse(text));
+  } catch (e) {
+    if (import.meta.env.DEV) console.warn('[eventService] source failed:', url, e);
+    return null;
+  }
+}
+
 export const fetchOfficialEvents = async (): Promise<OfficialEvent[]> => {
-  const n8nUrl = import.meta.env.VITE_N8N_EVENTS_URL;
-  
-  const DEV = import.meta.env.DEV;
-
-  // 1. Check Cache
-  const cached = localStorage.getItem(CACHE_KEY);
-  if (cached) {
-    try {
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
       const { timestamp, events }: CacheData = JSON.parse(cached);
-      const now = Date.now();
-      if (now - timestamp < CACHE_TTL) {
-        if (DEV) console.log('[eventService] Using cached official events');
-        return events;
-      }
-    } catch (e) {
-      if (DEV) console.error('[eventService] Failed to parse cached events', e);
+      if (Date.now() - timestamp < CACHE_TTL && Array.isArray(events)) return normalizeEventsPayload(events);
+    }
+  } catch { /* ignore corrupt cache */ }
+
+  for (const url of sources()) {
+    const events = await tryFetch(url);
+    if (events && events.length > 0) {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), events } satisfies CacheData));
+      return events;
     }
   }
-
-  // 2. Fetch from Network
-  if (n8nUrl) {
-    if (DEV) console.log('[eventService] Fetching official events from:', n8nUrl);
-    try {
-      const response = await fetch(n8nUrl);
-      if (response.ok) {
-        const text = await response.text();
-        if (text && text.trim() !== '') {
-          try {
-            const data = JSON.parse(text);
-            if (Array.isArray(data)) {
-              if (DEV) console.log('[eventService] Fetched', data.length, 'official events');
-              // Update Cache
-              const cacheData: CacheData = {
-                timestamp: Date.now(),
-                events: data
-              };
-              localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
-              return data;
-            } else {
-              if (DEV) console.warn('[eventService] Official events data is not an array:', data);
-            }
-          } catch (parseError) {
-            if (DEV) console.error('[eventService] Failed to parse official events JSON:', parseError);
-          }
-        } else {
-          if (DEV) console.warn('[eventService] Official events response was empty');
-        }
-      } else {
-        if (DEV) console.error('[eventService] Fetch failed with status:', response.status);
-      }
-    } catch (error) {
-      if (DEV) console.error('[eventService] Network error:', error);
-    }
-  } else {
-    if (DEV) console.warn('[eventService] VITE_N8N_EVENTS_URL is not defined');
-  }
-
-  // 3. Fallback — return empty array instead of stale hardcoded data
   return [];
 };

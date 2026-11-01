@@ -25,4 +25,4 @@ jobs:
       - name: Build
         run: npm run build
       - name: Validate locale keys match
-        run: node scripts/check-locales.mjs
+        run: node scripts/check-locales.mjs && node scripts/check-i18n-usage.mjs

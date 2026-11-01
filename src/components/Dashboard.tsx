@@ -6,6 +6,7 @@ import { CalendarEvent } from './EventCalendar';
 import ResetCountdown from './ResetCountdown';
 import { INITIAL_TASKS } from '../constants/tasks';
 import { getProgress, pruneExpired } from '../utils/taskUtils';
+import { CURRENT_PATCH } from '../constants/patch';
 import { NAV_GROUPS } from '../constants/tools';
 import { View } from '../types';
 import KoFiWidget from './KoFiWidget';
@@ -87,6 +88,7 @@ interface DashboardProps {
 }
 export default function Dashboard({ et, now, onViewChange, events, officialEvents }: DashboardProps) {
   const { t, i18n } = useTranslation();
+  const isZh = i18n.language === 'zh-TW';
   const [progress, setProgress] = useState({
     daily: { done: 0, total: 0 },
     weekly: { done: 0, total: 0 }
@@ -338,24 +340,52 @@ export default function Dashboard({ et, now, onViewChange, events, officialEvent
           <div className="h-1 w-8 bg-[var(--color-accent)] rounded-full" />
           <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--color-accent)]">{t('dashboard.patchVersion')}</h3>
         </div>
-        <a 
-          href="https://www.ffxiv.com.tw/web/news/news_list.aspx?category=2" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="block group relative overflow-hidden rounded-3xl border border-[var(--color-border)] hover:border-[var(--color-accent)]/30 transition-all"
-        >
-          <img 
-            src="/patch/7-1.jpg" 
-            alt="繁中服目前版本" 
-            className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
-            referrerPolicy="no-referrer"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
-            <span className="text-white text-sm font-medium flex items-center gap-2">
-              {t('dashboard.patchNote')} <ArrowRight size={16} />
-            </span>
+        <div className="relative overflow-hidden rounded-3xl border border-[var(--color-border)] bg-gradient-to-br from-[#2a2112] via-[var(--color-surface)] to-[var(--color-bg)]">
+          {CURRENT_PATCH.image && (
+            <img
+              src={CURRENT_PATCH.image}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover opacity-30"
+              referrerPolicy="no-referrer"
+            />
+          )}
+          <div className="relative p-6 lg:p-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="space-y-3">
+              <div className="flex items-baseline gap-3">
+                <span className="text-5xl font-display font-bold text-[var(--color-accent)]">{CURRENT_PATCH.version}</span>
+                <span className="text-xl font-bold text-white">{isZh ? CURRENT_PATCH.title.zh : CURRENT_PATCH.title.en}</span>
+              </div>
+              <p className="text-xs text-[var(--color-text-muted)]">
+                {t('dashboard.patchSeries', { series: CURRENT_PATCH.series, date: CURRENT_PATCH.seriesReleasedAt })}
+              </p>
+              <ul className="space-y-1">
+                {(isZh ? CURRENT_PATCH.highlights.zh : CURRENT_PATCH.highlights.en).map(h => (
+                  <li key={h} className="text-sm text-[var(--color-text)] flex gap-2">
+                    <span className="text-[var(--color-accent)]">•</span>{h}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="flex flex-col gap-2 shrink-0">
+              <a
+                href={CURRENT_PATCH.specialUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-[var(--color-accent)] text-[#0E0E10] text-sm font-semibold hover:brightness-110 transition-all"
+              >
+                {t('dashboard.patchSpecial')} <ArrowRight size={14} />
+              </a>
+              <a
+                href={CURRENT_PATCH.notesUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-white/5 text-white text-sm hover:bg-white/10 transition-all"
+              >
+                {t('dashboard.patchNote')} <ArrowRight size={14} />
+              </a>
+            </div>
           </div>
-        </a>
+        </div>
       </div>
       {/* Copyright Footer */}
       <footer className="pt-10 pb-6 border-t border-[var(--color-border)]">

@@ -255,7 +255,7 @@ export default function Skywatcher({ et, now }: { et: EorzeaTime; now: Date }) {
                   </p>
                   <div className="h-1 w-8 bg-emerald-500 rounded-full opacity-50" />
                   {i === 0 ? (
-                    <p className="mt-3 text-[10px] text-emerald-400 font-bold uppercase tracking-widest">
+                    <p className="mt-3 text-[10px] text-emerald-400 font-bold tracking-wider">
                       {t('skywatcher.current')} · {t('skywatcher.endsIn', { time: formatCountdown(item.end, now) })}
                     </p>
                   ) : (

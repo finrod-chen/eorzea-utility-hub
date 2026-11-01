@@ -1,6 +1,7 @@
 {
   "nav": {
     "daily": "Daily Tasks",
+    "backToTop": "Back to top",
     "overview": "Overview",
     "checklist": "Task Progress",
     "alarm": "Custom Alarms",
@@ -48,7 +49,9 @@
     "noOfficialEvents": "No official events at the moment",
     "noPersonalEvents": "No upcoming personal events",
     "patchVersion": "Current Patch",
-    "patchNote": "Patch",
+    "patchNote": "Patch notes",
+    "patchSeries": "{{series}} series, live on the TC server since {{date}}",
+    "patchSpecial": "Patch site",
     "footer": {
       "copyrightTitle": "Copyright & Disclaimer",
       "copyright1": "Final Fantasy XIV is a game by SQUARE ENIX. The Traditional Chinese version is co-published and operated by UserJoy and Jewels International.",
@@ -77,7 +80,7 @@
     "weekly": "Every Tuesday",
     "resetWeekly": "Weekly Reset",
     "aboutReset": "About Reset Times",
-    "resetNote": "Current reset times are manual references; auto-detection will be added in a future update",
+    "resetNote": "Checked tasks clear automatically after the daily 23:00, GC/tribe 04:00 and Tuesday 16:00 (GMT+8) resets",
     "clearCacheWarning": "All progress is saved in your browser — clearing cache will reset progress"
   },
   "eventCalendar": {
@@ -117,6 +120,8 @@
     "title": "Eorzea Utility Hub",
     "subtitle": "Your all-in-one companion for FFXIV adventures",
     "description": "Comprehensive tools for tracking dailies, events, market prices, and more.",
+    "toolGuide": "Tool guide",
+    "tips": "Tips",
     "alarm": {
       "title": "Custom Alarms",
       "desc": "Set in-game reminders so you never miss an adventure milestone",
@@ -148,6 +153,7 @@
     "hours": "hour(s)",
     "levequest": "Levequest Allowance Reset",
     "oceanFishingTime": "Every 2 hours (GMT+8)",
+    "oceanFishing": "Ocean Fishing Departure",
     "weeklyTime": "Tue 16:00 (GMT+8)"
   },
   "setAlarm": {

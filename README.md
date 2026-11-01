@@ -5,7 +5,7 @@
     <strong>專為《Final Fantasy XIV》光之戰士設計的一站式實用工具聚合站</strong>
   </p>
   <p align="center">
-    <img src="https://img.shields.io/badge/Version-1.9.0-D39E47?style=flat-square" alt="Version" />
+    <img src="https://img.shields.io/badge/Version-1.10.0-D39E47?style=flat-square" alt="Version" />
     <img src="https://img.shields.io/badge/React-19.0-61DAFB?style=flat-square&logo=react" alt="React" />
     <img src="https://img.shields.io/badge/Vite-6.4-646CFF?style=flat-square&logo=vite" alt="Vite" />
     <img src="https://img.shields.io/badge/Tailwind-4.1-38B2AC?style=flat-square&logo=tailwind-css" alt="Tailwind" />
@@ -43,7 +43,8 @@
 - **Animation**: Framer Motion (Motion/React)
 - **Build Tool**: Vite 6.4
 - **Notifications**: Sonner (Toaster)
-- **API Integration**: Universalis API, Google Generative AI (Gemini)
+- **API Integration**: Universalis API
+- **Testing / CI**: Vitest, GitHub Actions
 
 ## 💻 本地開發步驟
 
@@ -70,6 +71,16 @@
     ```
 
     造訪 `http://localhost:3000` 即可預覽。
+
+### 檢查與測試
+```bash
+npm run check   # 型別檢查 + 單元測試 + 建置
+```
+
+## 🔄 維護說明
+- **繁中服版本**：改 `src/constants/patch.ts` 即可更新首頁「繁中服目前版本」卡片（可放橫幅圖到 `public/patch/` 並設定 `image`）。
+- **官方活動**：`.github/workflows/official-events.yml` 每天兩次執行 `scripts/fetch-official-events.ts`，把結果寫入 `public/data/official-events.json`（有變動才 commit）。來源可在 repo 的 Actions variables 設定 `EVENTS_FEED_URL`（RSS）與 `EVENTS_LIST_URL`（官網新聞列表，備援）。也可在 Actions 頁面手動執行。
+- 舊的 n8n webhook（`VITE_N8N_EVENTS_URL`）仍可作為第二來源。
 
 ## 📜 版權聲明
 

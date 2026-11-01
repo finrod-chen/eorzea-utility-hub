@@ -54,6 +54,7 @@ import LanguageSwitcher from './components/LanguageSwitcher';
 import DataBackup from './components/DataBackup';
 import { Alarm, EorzeaTime, View } from './types';
 import { NAV_GROUPS } from './constants/tools';
+import { version as appVersion } from '../package.json';
 
 export default function App() {
   // ── i18n (declared first so effects below can reference `t`) ────────────
@@ -265,7 +266,7 @@ export default function App() {
               <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-xl shadow-lg shadow-[var(--color-accent-glow)]" referrerPolicy="no-referrer" />
               <div>
                 <h1 className="font-display font-bold text-lg tracking-tight text-white leading-tight">{t('nav.appName')}</h1>
-                <p className="text-[10px] uppercase tracking-widest text-[var(--color-accent)] font-semibold font-sans">Utility Hub V1.9.0</p>
+                <p className="text-[10px] uppercase tracking-widest text-[var(--color-accent)] font-semibold font-sans">Utility Hub V{appVersion}</p>
               </div>
             </button>
 
