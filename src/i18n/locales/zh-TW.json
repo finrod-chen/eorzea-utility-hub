@@ -411,7 +411,22 @@
     "apiError": "API 回應異常 ({status})",
     "noTradesRecord": "此物品不可交易（無法在市場板上架）。",
     "noDataExplanation": "該物品目前在市場上找不到數據。這通常是因為該物品較冷門，或在您選擇的區域尚未有玩家上傳行情。",
-    "fetchFailed": "獲取市場數據失敗"
+    "fetchFailed": "獲取市場數據失敗",
+    "watchlist": {
+      "title": "常用清單價格總覽",
+      "subtitle": "查詢範圍：{{location}}",
+      "updatedAt": "更新於 {{time}}",
+      "refresh": "重新整理",
+      "error": "價格載入失敗",
+      "item": "道具",
+      "lowest": "最低單價",
+      "world": "伺服器",
+      "average": "平均價",
+      "velocity": "日均成交",
+      "total": "最低價合計",
+      "velocityHint": "日均成交 = Universalis 統計的每日平均成交筆數，數字越高越好賣。點選任一列可查看完整掛單。",
+      "back": "回到常用清單總覽"
+    }
   },
   "koFi": {
     "label": "請我喝杯咖啡！"

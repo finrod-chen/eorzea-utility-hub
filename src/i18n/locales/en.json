@@ -411,7 +411,22 @@
     "apiError": "API response error ({status})",
     "noTradesRecord": "This item has no trade history (cannot be listed on Market Board).",
     "noDataExplanation": "Item data not found on the market. This usually means the item is too niche or hasn't been uploaded to your selected region yet.",
-    "fetchFailed": "Failed to fetch market data"
+    "fetchFailed": "Failed to fetch market data",
+    "watchlist": {
+      "title": "Watchlist overview",
+      "subtitle": "Scope: {{location}}",
+      "updatedAt": "updated {{time}}",
+      "refresh": "Refresh",
+      "error": "Failed to load prices",
+      "item": "Item",
+      "lowest": "Lowest",
+      "world": "World",
+      "average": "Average",
+      "velocity": "Sales/day",
+      "total": "Sum of lowest prices",
+      "velocityHint": "Sales/day is Universalis' average number of sales per day; higher means it sells faster. Click a row for full listings.",
+      "back": "Back to watchlist overview"
+    }
   },
   "koFi": {
     "label": "Buy Me a Coffee!"
