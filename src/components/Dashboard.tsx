@@ -400,12 +400,6 @@ export default function Dashboard({ et, now, onViewChange, events, officialEvent
             {t('dashboard.footer.copyright5')}
           </p>
         </div>
-
-        <div className="mt-6">
-          <a href="https://fwfw.app/item/ff14-toolkit" target="_blank" rel="noopener noreferrer">
-            <img src="https://fwfw.app/badge-black.svg" width="250" height="54" alt="Featured on FWFW" referrerPolicy="no-referrer" />
-          </a>
-        </div>
       </footer>
     </div>
   );

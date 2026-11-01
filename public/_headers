@@ -1,0 +1,9 @@
+# Keep the *.pages.dev preview hosts out of search results; ff14-tw.xyz is canonical.
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex
+
+https://:version.:project.pages.dev/*
+  X-Robots-Tag: noindex
+
+/sitemap.xml
+  Content-Type: application/xml; charset=utf-8
