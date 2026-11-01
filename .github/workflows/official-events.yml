@@ -17,6 +17,8 @@ concurrency:
 jobs:
   fetch:
     runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -30,12 +32,21 @@ jobs:
           EVENTS_LIST_URL: ${{ vars.EVENTS_LIST_URL }}
         run: npx tsx scripts/fetch-official-events.ts
       - name: Commit if changed
+        id: commit
         run: |
           if git diff --quiet -- public/data/official-events.json; then
-            echo "No changes"; exit 0
+            echo "No changes"; echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public/data/official-events.json
           git commit -m "chore(data): update official events"
           git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+  # Pushes made with GITHUB_TOKEN don't trigger other workflows, so deploy explicitly.
+  deploy:
+    needs: fetch
+    if: needs.fetch.outputs.changed == 'true'
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
