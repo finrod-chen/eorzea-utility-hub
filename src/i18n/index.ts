@@ -31,4 +31,11 @@ i18n
     },
   });
 
+// Keep <html lang> in sync for screen readers and search engines.
+const htmlLang = (lng: string) => (lng.startsWith('zh') ? 'zh-Hant-TW' : 'en');
+if (typeof document !== 'undefined') {
+  document.documentElement.lang = htmlLang(i18n.language || 'zh-TW');
+  i18n.on('languageChanged', lng => { document.documentElement.lang = htmlLang(lng); });
+}
+
 export default i18n;
