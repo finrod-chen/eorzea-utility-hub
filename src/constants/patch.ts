@@ -36,6 +36,7 @@ export const CURRENT_PATCH: PatchInfo = {
       '7.2: “Seekers of Eternity” main story, Zelenia trial, new Frontline map',
     ],
   },
+  image: '/patch/7-25.webp',
   specialUrl: 'https://www.ffxiv.com.tw/web/special/dawntrail/patch_7_2/',
   notesUrl: 'https://www.ffxiv.com.tw/web/special/patchnote_log/patch_7.25_notes.html',
 };

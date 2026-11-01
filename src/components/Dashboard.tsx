@@ -342,12 +342,17 @@ export default function Dashboard({ et, now, onViewChange, events, officialEvent
         </div>
         <div className="relative overflow-hidden rounded-3xl border border-[var(--color-border)] bg-gradient-to-br from-[#2a2112] via-[var(--color-surface)] to-[var(--color-bg)]">
           {CURRENT_PATCH.image && (
-            <img
-              src={CURRENT_PATCH.image}
-              alt=""
-              className="absolute inset-0 w-full h-full object-cover opacity-30"
-              referrerPolicy="no-referrer"
-            />
+            <a href={CURRENT_PATCH.notesUrl} target="_blank" rel="noopener noreferrer" className="block group overflow-hidden">
+              <img
+                src={CURRENT_PATCH.image}
+                alt={`FINAL FANTASY XIV ${CURRENT_PATCH.version} ${isZh ? CURRENT_PATCH.title.zh : CURRENT_PATCH.title.en}`}
+                width={1920}
+                height={502}
+                loading="lazy"
+                decoding="async"
+                className="w-full h-auto block group-hover:scale-[1.02] transition-transform duration-500"
+              />
+            </a>
           )}
           <div className="relative p-6 lg:p-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="space-y-3">
