@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { CloudSun, Search, Filter, MapPin, Sun, Cloud, CloudRain, CloudLightning, CloudSnow, Wind, CloudFog, Info } from 'lucide-react';
 import { MAPS } from '../data/ff14Data';
-import { calculateWeatherSeed, translateWeather, translateRegion } from '../utils/ff14';
+import { calculateWeatherSeed, translateWeather, translateRegion, etHourToRealDate, weatherWindowStart } from '../utils/ff14';
+import { formatCountdown } from '../utils/resets';
 import { useTranslation } from 'react-i18next';
 import type { EorzeaTime } from '../types';
 
@@ -29,11 +30,11 @@ const getWeatherIcon = (weather: string) => {
   }
 };
 
-export default function Skywatcher({ et }: { et: EorzeaTime }) {
+export default function Skywatcher({ et, now }: { et: EorzeaTime; now: Date }) {
   const { t, i18n } = useTranslation();
   const [selectedVersion, setSelectedVersion] = useState<string>('2.0');
   const [selectedMap, setSelectedMap] = useState(MAPS[0]);
-  const [forecast, setForecast] = useState<any[]>([]);
+  const [forecast, setForecast] = useState<{ time: string; name: string; seed: number; start: Date; end: Date }[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedWeather, setSelectedWeather] = useState<string>('All');
 
@@ -90,16 +91,16 @@ export default function Skywatcher({ et }: { et: EorzeaTime }) {
       const currentTotalHours = et.totalHours;
       
       for (let i = 0; i < 8; i++) {
-        const targetHours = currentTotalHours + (i * 8);
-        const seed = calculateWeatherSeed(targetHours);
+        const windowStart = weatherWindowStart(currentTotalHours) + i * 8;
+        const seed = calculateWeatherSeed(windowStart);
         const weather = selectedMap.rates.find(r => seed < r.rate) || selectedMap.rates[selectedMap.rates.length - 1];
-        
-        const displayHours = (Math.floor(targetHours / 8) * 8) % 24;
-        
+
         results.push({
-          time: `${String(displayHours).padStart(2, '0')}:00`,
+          time: `${String(windowStart % 24).padStart(2, '0')}:00`,
           name: weather.name,
-          seed
+          seed,
+          start: etHourToRealDate(windowStart),
+          end: etHourToRealDate(windowStart + 8),
         });
       }
       setForecast(results);
@@ -248,8 +249,20 @@ export default function Skywatcher({ et }: { et: EorzeaTime }) {
                     {getWeatherIcon(item.name)}
                     <p className="text-lg font-bold text-white">{translateWeather(item.name)}</p>
                   </div>
+                  <p className="text-xs text-[#9e9e9e] mb-2">
+                    {t('skywatcher.localTime')} {item.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                    –{item.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                  </p>
                   <div className="h-1 w-8 bg-emerald-500 rounded-full opacity-50" />
-                  {i === 0 && <p className="mt-3 text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Current</p>}
+                  {i === 0 ? (
+                    <p className="mt-3 text-[10px] text-emerald-400 font-bold uppercase tracking-widest">
+                      {t('skywatcher.current')} · {t('skywatcher.endsIn', { time: formatCountdown(item.end, now) })}
+                    </p>
+                  ) : (
+                    <p className="mt-3 text-[10px] text-[#9e9e9e] font-mono">
+                      {t('skywatcher.startsIn', { time: formatCountdown(item.start, now) })}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>

@@ -21,6 +21,16 @@ export function getEorzeaTime(date: Date = new Date()): { hours: number; minutes
   };
 }
 
+/** Real-world instant at which the given absolute Eorzea hour begins. */
+export function etHourToRealDate(totalEtHours: number): Date {
+  return new Date(totalEtHours * 175 * 1000);
+}
+
+/** Absolute ET hour of the 8-hour weather window that contains `totalEtHours`. */
+export function weatherWindowStart(totalEtHours: number): number {
+  return Math.floor(totalEtHours / 8) * 8;
+}
+
 // --- Weather Logic (LCG) ---
 // Formula: (totalDays * 100 + (totalHours + 8 - (totalHours % 8))) % 100
 export function calculateWeatherSeed(totalHours: number) {

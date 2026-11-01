@@ -217,7 +217,7 @@ export default function App() {
       case 'event-calendar': return <EventCalendar events={events} setEvents={setEvents} officialEvents={mappedOfficialEvents} />;
       case 'cactpot': return <MiniCactpot />;
       case 'tails': return <WondrousTails />;
-      case 'weather': return <Skywatcher et={et} />;
+      case 'weather': return <Skywatcher et={et} now={now} />;
       case 'interactive-maps': return <InteractiveMaps />;
       case 'treasure': return <TreasureHunt />;
       case 'chocobo': return <ChocoboColor />;

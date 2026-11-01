@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getEorzeaTime, calculateWeatherSeed, CACTPOT_PAYOUTS } from '../utils/ff14';
+import { getEorzeaTime, calculateWeatherSeed, CACTPOT_PAYOUTS, etHourToRealDate, weatherWindowStart } from '../utils/ff14';
 
 /** Reference implementation of the community weather formula, driven by real unix seconds. */
 function referenceSeed(unixSeconds: number): number {
@@ -48,5 +48,19 @@ describe('calculateWeatherSeed', () => {
 describe('CACTPOT_PAYOUTS', () => {
   it('covers every possible line sum 6..24', () => {
     for (let sum = 6; sum <= 24; sum++) expect(CACTPOT_PAYOUTS[sum]).toBeGreaterThan(0);
+  });
+});
+
+describe('weather windows in real time', () => {
+  it('converts ET hours back to real time (round trip)', () => {
+    const d = etHourToRealDate(123_456);
+    expect(getEorzeaTime(d).totalHours).toBe(123_456);
+    expect(getEorzeaTime(new Date(d.getTime() - 1)).totalHours).toBe(123_455);
+  });
+  it('an 8-ET-hour window lasts 23m20s of real time', () => {
+    const start = weatherWindowStart(1000);
+    expect(start).toBe(1000);
+    expect(weatherWindowStart(1007)).toBe(1000);
+    expect(etHourToRealDate(start + 8).getTime() - etHourToRealDate(start).getTime()).toBe(1400_000);
   });
 });
