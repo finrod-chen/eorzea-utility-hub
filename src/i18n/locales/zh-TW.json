@@ -432,6 +432,20 @@
       "back": "回到常用清單總覽"
     }
   },
+  "backup": {
+    "export": "匯出資料",
+    "import": "匯入資料",
+    "exportHint": "把任務進度、鬧鐘、行事曆、收藏等資料下載成 JSON 檔",
+    "importHint": "從先前匯出的 JSON 檔還原資料",
+    "exported": "已匯出 {{count}} 項資料",
+    "imported": "資料已還原，即將重新整理頁面",
+    "confirm": "要用 {{date}} 匯出的備份覆蓋目前瀏覽器裡的資料嗎？此動作無法復原。",
+    "errors": {
+      "invalid": "檔案格式不正確",
+      "wrongApp": "這不是艾歐澤亞助手的備份檔",
+      "version": "備份檔版本較新，請先更新網站後再匯入"
+    }
+  },
   "koFi": {
     "label": "請我喝杯咖啡！"
   },

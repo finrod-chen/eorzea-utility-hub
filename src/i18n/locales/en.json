@@ -432,6 +432,20 @@
       "back": "Back to watchlist overview"
     }
   },
+  "backup": {
+    "export": "Export data",
+    "import": "Import data",
+    "exportHint": "Download your task progress, alarms, calendar and favourites as a JSON file",
+    "importHint": "Restore from a previously exported JSON file",
+    "exported": "Exported {{count}} entries",
+    "imported": "Data restored, reloading…",
+    "confirm": "Replace the data in this browser with the backup exported on {{date}}? This cannot be undone.",
+    "errors": {
+      "invalid": "Invalid backup file",
+      "wrongApp": "This is not an Eorzea Utility Hub backup",
+      "version": "This backup was made by a newer version of the site"
+    }
+  },
   "koFi": {
     "label": "Buy Me a Coffee!"
   },

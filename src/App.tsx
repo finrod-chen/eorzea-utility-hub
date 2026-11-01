@@ -51,6 +51,7 @@ const InteractiveMaps = lazy(() => import('./components/InteractiveMaps'));
 
 import KoFiWidget from './components/KoFiWidget';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import DataBackup from './components/DataBackup';
 import { Alarm, EorzeaTime, View } from './types';
 import { NAV_GROUPS } from './constants/tools';
 
@@ -347,6 +348,7 @@ export default function App() {
                   </p>
                 </div>
               </div>
+              <DataBackup />
               <div className="kofi-widget-wrapper">
                 <KoFiWidget />
               </div>
