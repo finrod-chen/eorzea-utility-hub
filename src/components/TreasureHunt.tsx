@@ -226,7 +226,7 @@ placeholder={t('treasureHunt.enterZone')}
                       />
                       {/* Treasure Marker */}
                       {(() => {
-                        const markerPos = CoordinateUtils.gameToImageCoords(selectedLocation.coords.x, selectedLocation.coords.y);
+                        const markerPos = CoordinateUtils.gameToImageCoords(selectedLocation.coords.x, selectedLocation.coords.y, CoordinateUtils.sizeFactorFor(selectedLocation.zoneId));
                         return (
                         <img
                           src="/TreasureHunt/treasuresmark.png"
@@ -244,8 +244,8 @@ placeholder={t('treasureHunt.enterZone')}
                         
                         return aetherytes.map(aetheryte => (
                           <div key={aetheryte.id} className="absolute" style={{ 
-                            left: `${CoordinateUtils.gameToImageCoords(aetheryte.coords.x, aetheryte.coords.y).x}%`, 
-                            top: `${CoordinateUtils.gameToImageCoords(aetheryte.coords.x, aetheryte.coords.y).y}%` 
+                            left: `${CoordinateUtils.gameToImageCoords(aetheryte.coords.x, aetheryte.coords.y, CoordinateUtils.sizeFactorFor(selectedLocation.zoneId)).x}%`, 
+                            top: `${CoordinateUtils.gameToImageCoords(aetheryte.coords.x, aetheryte.coords.y, CoordinateUtils.sizeFactorFor(selectedLocation.zoneId)).y}%` 
                           }}>
                             <img 
                               src="/TreasureHunt/aetheryte.png"
