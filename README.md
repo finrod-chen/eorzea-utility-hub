@@ -79,7 +79,7 @@ npm run check   # 型別檢查 + 單元測試 + 建置
 
 ## 🔄 維護說明
 - **繁中服版本**：改 `src/constants/patch.ts` 即可更新首頁「繁中服目前版本」卡片（可放橫幅圖到 `public/patch/` 並設定 `image`）。
-- **官方活動**：`.github/workflows/official-events.yml` 每天兩次執行 `scripts/fetch-official-events.ts`，把結果寫入 `public/data/official-events.json`（有變動才 commit）。來源可在 repo 的 Actions variables 設定 `EVENTS_FEED_URL`（RSS）與 `EVENTS_LIST_URL`（官網新聞列表，備援）。也可在 Actions 頁面手動執行。
+- **官方活動**：`.github/workflows/official-events.yml` 每天兩次執行 `scripts/fetch-official-events.ts`，把結果寫入 `public/data/official-events.json`（有變動才 commit）。預設來源是官網「活動公告」列表（`news_list.aspx?category=1`），可用 Actions variables `EVENTS_LIST_URL` 覆寫；`EVENTS_FEED_URL`（RSS）為選用備援。也可在 Actions 頁面手動執行。
 - 舊的 n8n webhook（`VITE_N8N_EVENTS_URL`）仍可作為第二來源。
 
 ## 📜 版權聲明

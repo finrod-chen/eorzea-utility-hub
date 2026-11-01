@@ -33,14 +33,27 @@ describe('parseFeed', () => {
 });
 
 describe('parseNewsListHtml', () => {
-  it('extracts unique news links', () => {
-    const html = `<ul>
-      <li><a href="news_content.aspx?id=abc"><span>【活動】</span> 星芒祭 12/15</a></li>
-      <li><a href="/web/news/news_content.aspx?id=abc">dup</a></li>
-      <li><a href="other.aspx">nope</a></li></ul>`;
+  // Trimmed from the real 活動公告 page (category=1), including a nav-menu link that must be ignored.
+  const html = `
+    <ul><li><a href="https://www.ffxiv.com.tw/web/news/news_content.aspx?id=NAV"><p>10/27 商城新品上架</p></a></li></ul>
+    <div class="item">     <div class="first_block">        <div class="news_id">201</div>        <div class="type event">            <div class="type_icon"><svg></svg></div>        </div>    </div>    <div class="second_block">        <div class="title"><a href="/web/news/news_content.aspx?id=mP1K80yova">10/23 守護天節-魔物的慶典 滿懷感謝</a></div>        <div class="publish_date">2026/10/16</div>        <div class="view_count">1234</div>    </div></div>
+    <div class="item">     <div class="first_block">        <div class="news_id">3</div>        <div class="type other"></div>    </div>    <div class="second_block">        <div class="title"><span class="badge top">置頂</span><a href="/web/news/news_content.aspx?id=LENEEYbBA">一步步帶您踏入 &amp; 世界！</a></div>        <div class="publish_date">2025/8/9</div>    </div></div>`;
+
+  it('reads .item blocks with publish dates and skips nav links', () => {
     expect(parseNewsListHtml(html)).toEqual([
-      { title: '【活動】 星芒祭 12/15', url: 'https://www.ffxiv.com.tw/web/news/news_content.aspx?id=abc' },
+      { title: '10/23 守護天節-魔物的慶典 滿懷感謝', url: 'https://www.ffxiv.com.tw/web/news/news_content.aspx?id=mP1K80yova', publishedAt: '2026-10-16T00:00:00+08:00' },
+      { title: '一步步帶您踏入 & 世界！', url: 'https://www.ffxiv.com.tw/web/news/news_content.aspx?id=LENEEYbBA', publishedAt: '2025-08-09T00:00:00+08:00' },
     ]);
+  });
+
+  it('uses the publish date to pick the year', () => {
+    const items = parseNewsListHtml(html);
+    const events = buildEvents(items, { now: new Date('2026-10-30T00:00:00Z') });
+    expect(events).toHaveLength(1);
+    expect(events[0].date).toBe('2026-10-23T14:00:00+08:00');
+    // A December post announcing a January event lands in the next year.
+    expect(buildEvents([{ title: '01/06 新年活動', url: 'x', publishedAt: '2026-12-20T00:00:00+08:00' }], { now: new Date('2027-01-01T00:00:00Z') })[0].date)
+      .toBe('2027-01-06T14:00:00+08:00');
   });
 });
 

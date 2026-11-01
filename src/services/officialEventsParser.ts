@@ -42,31 +42,45 @@ export function parseFeed(xml: string): RawNewsItem[] {
   return items;
 }
 
-/** Fallback: pull news links straight from the official news-list HTML. */
+/**
+ * Parses the official news-list page (https://www.ffxiv.com.tw/web/news/news_list.aspx?category=1).
+ * Each entry looks like:
+ *   <div class="item"> … <div class="type event"> … <div class="title"><a href="/web/news/news_content.aspx?id=…">10/23 守護天節…</a></div>
+ *   <div class="publish_date">2026/10/16</div> … </div>
+ * Only `.item` blocks are read, so the navigation menu's "latest news" links are ignored.
+ */
 export function parseNewsListHtml(html: string, baseUrl = 'https://www.ffxiv.com.tw/web/news/'): RawNewsItem[] {
   const seen = new Set<string>();
   const items: RawNewsItem[] = [];
-  const re = /<a\b[^>]*href="([^"]*news_content\.aspx\?id=[^"&]+)[^"]*"[^>]*>([\s\S]*?)<\/a>/gi;
-  for (const m of html.matchAll(re)) {
-    const url = new URL(decodeEntities(m[1]), baseUrl).toString();
-    const title = decodeEntities(m[2].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' '));
+  const blocks = html.split(/<div class="item">/).slice(1);
+  for (const block of blocks) {
+    const a = block.match(/<div class="title">[\s\S]*?<a\b[^>]*href="([^"]*news_content\.aspx\?id=[^"]+)"[^>]*>([\s\S]*?)<\/a>/i);
+    if (!a) continue;
+    const url = new URL(decodeEntities(a[1]), baseUrl).toString();
+    const title = decodeEntities(a[2].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' '));
+    const date = block.match(/<div class="publish_date">\s*(\d{4})\/(\d{1,2})\/(\d{1,2})\s*</);
     if (!title || seen.has(url)) continue;
     seen.add(url);
-    items.push({ title, url });
+    items.push({
+      title,
+      url,
+      publishedAt: date ? `${date[1]}-${date[2].padStart(2, '0')}-${date[3].padStart(2, '0')}T00:00:00+08:00` : undefined,
+    });
   }
   return items;
 }
 
 /**
- * Finds the first MM/DD in the title and resolves the year relative to `now`
- * (handles Dec→Jan rollover). Returns an ISO string at 14:00 GMT+8 (usual maintenance end).
+ * Finds the first MM/DD in the title and resolves the year relative to `reference`
+ * (the publish date when known, otherwise now; handles Dec→Jan rollover).
+ * Returns an ISO string at 14:00 GMT+8 (usual maintenance end).
  */
-export function extractEventDate(title: string, now: Date): string | undefined {
+export function extractEventDate(title: string, reference: Date): string | undefined {
   const m = title.match(/(?<!\d)(0?[1-9]|1[0-2])\/(0?[1-9]|[12]\d|3[01])(?!\d)/);
   if (!m) return undefined;
   const month = Number(m[1]);
   const day = Number(m[2]);
-  const tw = new Date(now.getTime() + 8 * 3600_000); // wall clock in Taipei
+  const tw = new Date(reference.getTime() + 8 * 3600_000); // wall clock in Taipei
   const curMonth = tw.getUTCMonth() + 1;
   let year = tw.getUTCFullYear();
   if (curMonth >= 11 && month <= 2) year += 1;
@@ -102,7 +116,9 @@ export function buildEvents(items: RawNewsItem[], opts: BuildOptions): OfficialE
     if (seen.has(it.url)) continue;
     if (opts.include && !opts.include.test(it.title)) continue;
     if (opts.exclude && opts.exclude.test(it.title)) continue;
-    const date = extractEventDate(it.title, opts.now);
+    const published = it.publishedAt ? new Date(it.publishedAt) : undefined;
+    const reference = published && !Number.isNaN(published.getTime()) ? published : opts.now;
+    const date = extractEventDate(it.title, reference);
     if (!date) continue;
     if (opts.now.getTime() - new Date(date).getTime() > keepPastMs) continue;
     seen.add(it.url);
