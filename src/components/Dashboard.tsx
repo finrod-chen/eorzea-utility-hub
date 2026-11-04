@@ -7,6 +7,8 @@ import ResetCountdown from './ResetCountdown';
 import { INITIAL_TASKS } from '../constants/tasks';
 import { getProgress, pruneExpired } from '../utils/taskUtils';
 import { CURRENT_PATCH } from '../constants/patch';
+import { pageForView } from '../constants/seo';
+import { isModifiedClick } from '../utils/pageMeta';
 import { NAV_GROUPS } from '../constants/tools';
 import { View } from '../types';
 import KoFiWidget from './KoFiWidget';
@@ -22,18 +24,19 @@ interface TiltCardProps {
     desc: string;
     color: string;
   };
+  href: string;
   onClick: () => void;
 }
 
-function TiltCard({ tool, onClick }: TiltCardProps) {
-  const cardRef = useRef<HTMLButtonElement>(null);
+function TiltCard({ tool, href, onClick }: TiltCardProps) {
+  const cardRef = useRef<HTMLAnchorElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
   const rotateX = useTransform(y, [-0.5, 0.5], [8, -8]);
   const rotateY = useTransform(x, [-0.5, 0.5], [-8, 8]);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
     const rect = cardRef.current?.getBoundingClientRect();
     if (!rect) return;
     x.set((e.clientX - rect.left) / rect.width - 0.5);
@@ -46,15 +49,20 @@ function TiltCard({ tool, onClick }: TiltCardProps) {
   };
 
   return (
-    <motion.button
+    <motion.a
       ref={cardRef}
-      onClick={onClick}
+      href={href}
+      onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+        if (isModifiedClick(e)) return;
+        e.preventDefault();
+        onClick();
+      }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 text-left group"
+      className="block bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 text-left group"
     >
       <div
         className="flex justify-between items-start mb-4"
@@ -75,7 +83,7 @@ function TiltCard({ tool, onClick }: TiltCardProps) {
         <h4 className="font-bold text-white mb-2">{tool.label}</h4>
         <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">{tool.desc}</p>
       </div>
-    </motion.button>
+    </motion.a>
   );
 }
 
@@ -330,6 +338,7 @@ export default function Dashboard({ et, now, onViewChange, events, officialEvent
           <TiltCard
             key={tool.id}
             tool={tool}
+            href={pageForView(tool.id).path}
             onClick={() => handleViewChange(tool.id)}
           />
         ))}

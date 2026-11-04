@@ -10,3 +10,6 @@ coverage/
 # Script artefacts
 scripts/tmp_maps/
 scripts/preview_*.png
+
+# local Cloudflare Pages dev state
+.wrangler/
