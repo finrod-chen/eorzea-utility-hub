@@ -78,7 +78,7 @@ export default function TreasureHunt() {
           <div className="p-2 bg-amber-500/10 rounded-xl">
             <MapIcon className="text-amber-500" size={24} />
           </div>
-<h2 className="text-2xl font-bold text-white tracking-tight">{t('treasureHunt.title')}</h2>
+<h1 className="text-2xl font-bold text-white tracking-tight">{t('treasureHunt.title')}</h1>
         </div>
         <p className="text-[#9e9e9e] text-sm">{t('treasureHunt.subtitle')}</p>
       </header>

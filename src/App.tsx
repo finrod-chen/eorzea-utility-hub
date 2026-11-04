@@ -54,13 +54,39 @@ import LanguageSwitcher from './components/LanguageSwitcher';
 import DataBackup from './components/DataBackup';
 import { Alarm, EorzeaTime, View } from './types';
 import { NAV_GROUPS } from './constants/tools';
+import { pageForPath, pageForView } from './constants/seo';
+import { applyPageMeta, isModifiedClick } from './utils/pageMeta';
 import { version as appVersion } from '../package.json';
 
 export default function App() {
   // ── i18n (declared first so effects below can reference `t`) ────────────
   const { t } = useTranslation();
 
-  const [currentView, setCurrentView] = useState<View>('home');
+  const [currentView, setCurrentView] = useState<View>(
+    () => pageForPath(window.location.pathname)?.view ?? 'home',
+  );
+
+  // ── URL routing: every tool has its own path (/weather, /treasure …) ──────
+  const navigate = (view: View) => {
+    setCurrentView(view);
+    const path = pageForView(view).path;
+    if (window.location.pathname.replace(/\/+$/, '') !== path.replace(/\/+$/, '')) {
+      window.history.pushState({ view }, '', path);
+    }
+  };
+
+  // Unknown path (served by 404.html): show the home view under its real URL.
+  useEffect(() => {
+    if (!pageForPath(window.location.pathname)) window.history.replaceState({ view: 'home' }, '', '/');
+  }, []);
+
+  useEffect(() => {
+    const onPop = () => setCurrentView(pageForPath(window.location.pathname)?.view ?? 'home');
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  useEffect(() => { applyPageMeta(pageForView(currentView)); }, [currentView]);
   const [events, setEvents] = useState<CalendarEvent[]>(() => {
     const saved = localStorage.getItem('ff14-events');
     if (!saved) return [];
@@ -212,7 +238,7 @@ export default function App() {
 
   const renderView = () => {
     switch (currentView) {
-      case 'home': return <Dashboard et={et} now={now} onViewChange={setCurrentView} events={events} officialEvents={officialEvents} />;
+      case 'home': return <Dashboard et={et} now={now} onViewChange={navigate} events={events} officialEvents={officialEvents} />;
       case 'checklist': return <DutyChecklist />;
       case 'market': return <MarketBoard />;
       case 'alarm': return <SetAlarm alarms={alarms} setAlarms={setAlarms} now={now} />;
@@ -226,8 +252,8 @@ export default function App() {
       case 'sightseeing': return <SightseeingLog et={et} />;
       case 'links': return <UsefulLinks />;
       case 'changelog': return <Changelog />;
-      case 'guide': return <NavigationGuide onViewChange={setCurrentView} />;
-      default: return <Dashboard et={et} now={now} onViewChange={setCurrentView} events={events} officialEvents={officialEvents} />;
+      case 'guide': return <NavigationGuide onViewChange={navigate} />;
+      default: return <Dashboard et={et} now={now} onViewChange={navigate} events={events} officialEvents={officialEvents} />;
     }
   };
 
@@ -236,13 +262,14 @@ export default function App() {
       <Toaster position="top-right" theme="dark" richColors closeButton />
       {/* Mobile Header */}
       <header className="lg:hidden flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
-        <button 
-          onClick={() => setCurrentView('home')}
+        <a
+          href="/"
+          onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); navigate('home'); }}
           className="flex items-center gap-2 hover:opacity-80 transition-opacity"
         >
           <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-lg" referrerPolicy="no-referrer" />
-          <h1 className="font-bold text-lg tracking-tight text-white">{t('nav.appName')}</h1>
-        </button>
+          <span className="font-bold text-lg tracking-tight text-white">{t('nav.appName')}</span>
+        </a>
         <button 
           onClick={() => setIsSidebarOpen(true)}
           className="p-2 hover:bg-[var(--color-border)] rounded-lg transition-colors"
@@ -259,16 +286,17 @@ export default function App() {
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}>
           <div className="flex flex-col h-full">
-            <button 
-              onClick={() => setCurrentView('home')}
+            <a
+              href="/"
+              onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); navigate('home'); }}
               className="p-6 hidden lg:flex items-center gap-3 hover:opacity-80 transition-opacity text-left"
             >
               <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-xl shadow-lg shadow-[var(--color-accent-glow)]" referrerPolicy="no-referrer" />
               <div>
-                <h1 className="font-display font-bold text-lg tracking-tight text-white leading-tight">{t('nav.appName')}</h1>
+                <span className="block font-display font-bold text-lg tracking-tight text-white leading-tight">{t('nav.appName')}</span>
                 <p className="text-[10px] uppercase tracking-widest text-[var(--color-accent)] font-semibold font-sans">Utility Hub V{appVersion}</p>
               </div>
-            </button>
+            </a>
 
             <nav className="flex-1 px-4 py-4 space-y-6 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {navGroups.map((group) => (
@@ -290,12 +318,17 @@ export default function App() {
                       className="space-y-1"
                     >
                       {group.items.map((item) => (
-                        <motion.button
+                        <motion.a
                           key={item.id}
+                          href={pageForView(item.id).path}
+                          aria-current={currentView === item.id ? 'page' : undefined}
                           variants={navItemVariants}
                           custom={0}
-                          onClick={() => {
-                            setCurrentView(item.id);
+                          onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                            if (isModifiedClick(e)) return;
+                            e.preventDefault();
+                            navigate(item.id);
+                            setIsSidebarOpen(false);
                             setOpenGroups(prev => prev.filter(g => g !== group.key));
                             const main = document.getElementById('main-content');
                             if (main) main.scrollTo({ top: 0, behavior: 'smooth' });
@@ -318,7 +351,7 @@ export default function App() {
                             <item.icon size={20} className={currentView === item.id ? 'text-[#0E0E10]' : 'group-hover:scale-110 transition-transform text-[var(--color-text-muted)]'} />
                           )}
                           <span className="text-sm">{t(item.label)}</span>
-                        </motion.button>
+                        </motion.a>
                       ))}
                     </motion.div>
                   )}
