@@ -114,6 +114,12 @@ export const PAGES: PageSeo[] = [
     title: '更新日誌｜艾歐澤亞助手',
     description: '艾歐澤亞助手的功能更新、資料修正與維護紀錄，依版本整理。',
   },
+  {
+    view: 'privacy', path: '/privacy', changefreq: 'monthly', priority: 0.2,
+    heading: '隱私權政策',
+    title: '隱私權政策｜艾歐澤亞助手',
+    description: '艾歐澤亞助手的隱私權政策：說明本站儲存在瀏覽器的資料、使用的第三方服務，以及廣告 Cookie 的設定方式。',
+  },
 ];
 
 const BY_VIEW = new Map(PAGES.map(p => [p.view, p]));

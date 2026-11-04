@@ -453,6 +453,18 @@
     }
   },
   "toolGuide": { "howTo": "使用說明", "faq": "常見問題" },
+  "consent": {
+    "title": "Cookie 與廣告",
+    "body": "本站使用 Google AdSense 顯示廣告來支持網站維運，Google 可能會使用 Cookie 提供個人化廣告。你的工具資料只會存在自己的瀏覽器裡。",
+    "policyLink": "隱私權政策",
+    "accept": "全部接受",
+    "reject": "僅必要",
+    "settingsTitle": "Cookie 設定",
+    "settingsDesc": "重新選擇是否允許 Google 使用 Cookie 提供個人化廣告。",
+    "settingsButton": "變更 Cookie 設定",
+    "contact": "對本政策有疑問，請來信：",
+    "lastUpdated": "最後更新日期：{{date}}"
+  },
   "koFi": {
     "label": "請我喝杯咖啡！"
   },

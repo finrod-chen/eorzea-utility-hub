@@ -415,6 +415,13 @@ export default function Dashboard({ et, now, onViewChange, events, officialEvent
             {t('dashboard.footer.copyright4')}<br />
             {t('dashboard.footer.copyright5')}
           </p>
+          <a
+            href="/privacy"
+            onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); handleViewChange('privacy'); }}
+            className="inline-block text-[11px] text-[var(--color-accent)] hover:underline"
+          >
+            {t('consent.policyLink')}
+          </a>
         </div>
       </footer>
     </div>

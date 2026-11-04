@@ -6,8 +6,8 @@
 export const BACKUP_APP_ID = 'eorzea-utility-hub';
 export const BACKUP_VERSION = 1;
 
-/** Keys that are caches and should never be exported. */
-const EXCLUDED_KEYS = new Set(['ff14-official-events-cache']);
+/** Keys that are caches or per-browser consent and should never be exported. */
+const EXCLUDED_KEYS = new Set(['ff14-official-events-cache', 'ff14-consent']);
 const EXTRA_KEYS = ['i18nextLng'];
 
 export interface BackupFile {

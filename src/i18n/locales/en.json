@@ -453,6 +453,18 @@
     }
   },
   "toolGuide": { "howTo": "How to use", "faq": "FAQ" },
+  "consent": {
+    "title": "Cookies & ads",
+    "body": "This site shows Google AdSense ads to cover running costs, and Google may use cookies to personalise them. Your tool data stays in your own browser.",
+    "policyLink": "Privacy Policy",
+    "accept": "Accept all",
+    "reject": "Necessary only",
+    "settingsTitle": "Cookie settings",
+    "settingsDesc": "Choose again whether Google may use cookies for personalised ads.",
+    "settingsButton": "Change cookie settings",
+    "contact": "Questions about this policy? Email",
+    "lastUpdated": "Last updated: {{date}}"
+  },
   "koFi": {
     "label": "Buy Me a Coffee!"
   },
