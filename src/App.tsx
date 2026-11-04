@@ -48,11 +48,13 @@ const TreasureHunt = lazy(() => import('./components/TreasureHunt'));
 const EventCalendar = lazy(() => import('./components/EventCalendar'));
 const SetAlarm = lazy(() => import('./components/SetAlarm'));
 const InteractiveMaps = lazy(() => import('./components/InteractiveMaps'));
+const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
 
 import KoFiWidget from './components/KoFiWidget';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import DataBackup from './components/DataBackup';
 import ToolGuide from './components/ToolGuide';
+import ConsentBanner from './components/ConsentBanner';
 import { Alarm, EorzeaTime, View } from './types';
 import { NAV_GROUPS } from './constants/tools';
 import { pageForPath, pageForView } from './constants/seo';
@@ -254,6 +256,7 @@ export default function App() {
       case 'links': return <UsefulLinks />;
       case 'changelog': return <Changelog />;
       case 'guide': return <NavigationGuide onViewChange={navigate} />;
+      case 'privacy': return <PrivacyPolicy />;
       default: return <Dashboard et={et} now={now} onViewChange={navigate} events={events} officialEvents={officialEvents} />;
     }
   };
@@ -261,6 +264,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] font-sans selection:bg-[var(--color-accent)]">
       <Toaster position="top-right" theme="dark" richColors closeButton />
+      <ConsentBanner onOpenPrivacy={() => navigate('privacy')} />
       {/* Mobile Header */}
       <header className="lg:hidden flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
         <a
@@ -390,6 +394,13 @@ export default function App() {
               <div className="flex justify-center">
                 <LanguageSwitcher />
               </div>
+              <a
+                href="/privacy"
+                onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); navigate('privacy'); setIsSidebarOpen(false); }}
+                className="block text-center text-[10px] text-[var(--color-text-faint)] hover:text-[var(--color-text-muted)] transition-colors"
+              >
+                {t('consent.policyLink')}
+              </a>
             </div>
           </div>
 

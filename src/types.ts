@@ -17,4 +17,5 @@ export interface EorzeaTime {
 export type View =
   | 'home' | 'cactpot' | 'tails' | 'weather' | 'sightseeing'
   | 'changelog' | 'chocobo' | 'checklist' | 'guide' | 'market'
-  | 'links' | 'treasure' | 'alarm' | 'event-calendar' | 'interactive-maps';
+  | 'links' | 'treasure' | 'alarm' | 'event-calendar' | 'interactive-maps'
+  | 'privacy';

@@ -11,6 +11,27 @@
     <script defer src="https://code.bdstatic.com/npm/jquery@3.2.1/dist/jquery.min.js"></script>
     <script defer src="https://code.bdstatic.com/npm/@thewakingsands/eorzea-interactive-map@1.1.1/dist/map.js"></script>
     <script defer src="https://unpkg.com/@thewakingsands/kit-tooltip@latest/dist/xivkit-tooltip.js"></script>
+    <!-- Google Consent Mode v2: defaults must be set before AdSense loads -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ dataLayer.push(arguments); }
+      (function () {
+        var c = null;
+        try { c = localStorage.getItem('ff14-consent'); } catch (e) {}
+        var types = ['ad_storage', 'ad_user_data', 'ad_personalization', 'analytics_storage'];
+        var state = function (v) { var o = {}; types.forEach(function (t) { o[t] = v; }); return o; };
+        if (c === 'granted' || c === 'denied') {
+          gtag('consent', 'default', state(c));
+        } else {
+          var strict = state('denied');
+          strict.region = ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IS','IE','IT','LV','LI','LT','LU','MT','NL','NO','PL','PT','RO','SK','SI','ES','SE','GB','CH'];
+          strict.wait_for_update = 500;
+          gtag('consent', 'default', strict);
+          gtag('consent', 'default', state('granted'));
+        }
+        if (c === 'denied') { (window.adsbygoogle = window.adsbygoogle || []).requestNonPersonalizedAds = 1; }
+      })();
+    </script>
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0107538119751408"
      crossorigin="anonymous"></script>
