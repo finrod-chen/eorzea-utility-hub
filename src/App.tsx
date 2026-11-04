@@ -52,6 +52,7 @@ const InteractiveMaps = lazy(() => import('./components/InteractiveMaps'));
 import KoFiWidget from './components/KoFiWidget';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import DataBackup from './components/DataBackup';
+import ToolGuide from './components/ToolGuide';
 import { Alarm, EorzeaTime, View } from './types';
 import { NAV_GROUPS } from './constants/tools';
 import { pageForPath, pageForView } from './constants/seo';
@@ -414,6 +415,7 @@ export default function App() {
             >
               <Suspense fallback={<div className="py-24 text-center text-[var(--color-text-muted)] text-sm">{t('common.loading', { defaultValue: 'Loading…' })}</div>}>
                 {renderView()}
+                {currentView !== 'home' && <ToolGuide view={currentView} />}
               </Suspense>
             </motion.div>
           </AnimatePresence>

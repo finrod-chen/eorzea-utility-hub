@@ -452,6 +452,7 @@
       "version": "This backup was made by a newer version of the site"
     }
   },
+  "toolGuide": { "howTo": "How to use", "faq": "FAQ" },
   "koFi": {
     "label": "Buy Me a Coffee!"
   },

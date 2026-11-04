@@ -26,3 +26,20 @@ describe('page SEO config', () => {
     expect(canonicalUrl(pageForView('treasure'))).toBe('https://ff14-tw.xyz/treasure');
   });
 });
+
+describe('tool guides', () => {
+  it('has zh and en text with matching shape for every guided page', async () => {
+    const { TOOL_GUIDES } = await import('../constants/toolGuides');
+    const entries = Object.entries(TOOL_GUIDES);
+    expect(entries.length).toBeGreaterThanOrEqual(12);
+    for (const [view, g] of entries) {
+      expect(PAGES.some(p => p.view === view)).toBe(true);
+      for (const lang of [g!.zh, g!.en]) {
+        expect(lang.intro.length).toBeGreaterThan(30);
+        expect(lang.steps.length).toBeGreaterThanOrEqual(3);
+      }
+      expect(g!.zh.steps.length).toBe(g!.en.steps.length);
+      expect(g!.zh.faq.length).toBe(g!.en.faq.length);
+    }
+  });
+});

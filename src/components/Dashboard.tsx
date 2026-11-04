@@ -7,6 +7,7 @@ import ResetCountdown from './ResetCountdown';
 import { INITIAL_TASKS } from '../constants/tasks';
 import { getProgress, pruneExpired } from '../utils/taskUtils';
 import { CURRENT_PATCH } from '../constants/patch';
+import ToolGuide from './ToolGuide';
 import { pageForView } from '../constants/seo';
 import { isModifiedClick } from '../utils/pageMeta';
 import { NAV_GROUPS } from '../constants/tools';
@@ -401,6 +402,7 @@ export default function Dashboard({ et, now, onViewChange, events, officialEvent
           </div>
         </div>
       </div>
+      <ToolGuide view="home" />
       {/* Copyright Footer */}
       <footer className="pt-10 pb-6 border-t border-[var(--color-border)]">
         <div className="space-y-4">
