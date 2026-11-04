@@ -17,6 +17,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PAGES, SITE_NAME, SITE_URL, canonicalUrl, type PageSeo } from '../src/constants/seo.ts';
+import { TOOL_GUIDES } from '../src/constants/toolGuides.ts';
 
 const DIST = resolve(dirname(fileURLToPath(import.meta.url)), '../dist');
 const template = readFileSync(join(DIST, 'index.html'), 'utf8');
@@ -71,6 +72,19 @@ function jsonLd(page: PageSeo): string {
       ],
     });
   }
+  const guide = TOOL_GUIDES[page.view]?.zh;
+  if (guide && guide.faq.length) {
+    graph.push({
+      '@type': 'FAQPage',
+      '@id': `${url}#faq`,
+      inLanguage: 'zh-Hant-TW',
+      mainEntity: guide.faq.map(f => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    });
+  }
   // `</` must not appear inside a <script> block.
   return JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c');
 }
@@ -79,8 +93,16 @@ function staticBody(page: PageSeo): string {
   const links = PAGES.filter(p => p.path !== page.path)
     .map(p => `<li><a href="${p.path}">${esc(p.heading)}</a></li>`)
     .join('');
+  const guide = TOOL_GUIDES[page.view]?.zh;
+  const guideHtml = guide
+    ? `<section><h2>使用說明</h2><p>${esc(guide.intro)}</p><ol>${guide.steps.map(x => `<li>${esc(x)}</li>`).join('')}</ol>` +
+      (guide.faq.length
+        ? `<h2>常見問題</h2>${guide.faq.map(f => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join('')}`
+        : '') +
+      `</section>`
+    : '';
   return (
-    `<div class="prerender"><h1>${esc(page.heading)}</h1><p>${esc(page.description)}</p>` +
+    `<div class="prerender"><h1>${esc(page.heading)}</h1><p>${esc(page.description)}</p>${guideHtml}` +
     `<nav aria-label="${esc(SITE_NAME)}"><ul>${links}</ul></nav></div>`
   );
 }
