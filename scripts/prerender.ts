@@ -17,7 +17,12 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PAGES, SITE_NAME, SITE_URL, canonicalUrl, type PageSeo } from '../src/constants/seo.ts';
-import { TOOL_GUIDES } from '../src/constants/toolGuides.ts';
+import { TOOL_GUIDES, type GuideSection } from '../src/constants/toolGuides.ts';
+import { LINK_CATEGORIES } from '../src/constants/usefulLinks.ts';
+import { CHANGELOG } from '../src/constants/changelog.ts';
+import { PRIVACY_CONTENT } from '../src/constants/privacy.ts';
+import { CONTACT_EMAIL, PRIVACY_UPDATED } from '../src/constants/site.ts';
+import zhTW from '../src/i18n/locales/zh-TW.json' with { type: 'json' };
 
 const DIST = resolve(dirname(fileURLToPath(import.meta.url)), '../dist');
 const template = readFileSync(join(DIST, 'index.html'), 'utf8');
@@ -89,25 +94,74 @@ function jsonLd(page: PageSeo): string {
   return JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c');
 }
 
+function sectionHtml(sec: GuideSection): string {
+  let h = `<h2>${esc(sec.heading)}</h2>`;
+  for (const p of sec.paragraphs ?? []) h += `<p>${esc(p)}</p>`;
+  if (sec.list) h += `<ul>${sec.list.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
+  if (sec.table) {
+    const t = sec.table;
+    h += `<table>${t.caption ? `<caption>${esc(t.caption)}</caption>` : ''}` +
+      `<thead><tr>${t.head.map(c => `<th scope="col">${esc(c)}</th>`).join('')}</tr></thead>` +
+      `<tbody>${t.rows.map(r => `<tr>${r.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  }
+  if (sec.note) h += `<p>${esc(sec.note)}</p>`;
+  return h;
+}
+
+const lookup = (key: string): string =>
+  key.split('.').reduce<any>((o, k) => (o == null ? o : o[k]), zhTW) ?? key;
+
+/** Page-specific body for the data-driven pages (links / changelog / privacy). */
+function dataBody(page: PageSeo): string {
+  if (page.view === 'links') {
+    return LINK_CATEGORIES.map(c =>
+      `<h2>${esc(String(lookup(c.titleKey)))}</h2><ul>${c.links.map(l => `<li>${esc(l.title)}</li>`).join('')}</ul>`,
+    ).join('');
+  }
+  if (page.view === 'changelog') {
+    return CHANGELOG.map(e =>
+      `<h2>${esc(e.version)}（${esc(e.date)}）${esc(e.title)}</h2><ul>${e.items.map(i => `<li>${esc(i.text)}</li>`).join('')}</ul>`,
+    ).join('');
+  }
+  if (page.view === 'privacy') {
+    const c = PRIVACY_CONTENT.zh;
+    return `<p>${esc(c.intro)}</p>` + c.sections.map(s =>
+      `<h2>${esc(s.title)}</h2>${(s.paragraphs ?? []).map(p => `<p>${esc(p)}</p>`).join('')}` +
+      (s.items ? `<ul>${s.items.map(i => `<li>${esc(i)}</li>`).join('')}</ul>` : ''),
+    ).join('') + `<p>聯絡信箱：${esc(CONTACT_EMAIL)}</p><p>最後更新日期：${esc(PRIVACY_UPDATED)}</p>`;
+  }
+  return '';
+}
+
 function staticBody(page: PageSeo): string {
   const links = PAGES.filter(p => p.path !== page.path)
     .map(p => `<li><a href="${p.path}">${esc(p.heading)}</a></li>`)
     .join('');
-  const guide = TOOL_GUIDES[page.view]?.zh;
-  const guideHtml = guide
-    ? `<section><h2>使用說明</h2><p>${esc(guide.intro)}</p><ol>${guide.steps.map(x => `<li>${esc(x)}</li>`).join('')}</ol>` +
+  const tg = TOOL_GUIDES[page.view];
+  const guide = tg?.zh;
+  let guideHtml = '';
+  if (guide) {
+    guideHtml = `<section><h2>使用說明</h2><p>${esc(guide.intro)}</p>` +
+      (guide.steps.length ? `<ol>${guide.steps.map(x => `<li>${esc(x)}</li>`).join('')}</ol>` : '') +
+      (guide.sections ?? []).map(sectionHtml).join('') +
       (guide.faq.length
         ? `<h2>常見問題</h2>${guide.faq.map(f => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join('')}`
         : '') +
-      `</section>`
-    : '';
+      (tg?.related?.length
+        ? `<h2>相關工具</h2><ul>${tg.related.map(r => {
+            const rp = PAGES.find(p => p.view === r.view);
+            return rp ? `<li><a href="${rp.path}">${esc(rp.heading)}</a>：${esc(r.note)}</li>` : '';
+          }).join('')}</ul>`
+        : '') +
+      `</section>`;
+  }
   return (
-    `<div class="prerender"><h1>${esc(page.heading)}</h1><p>${esc(page.description)}</p>${guideHtml}` +
+    `<div class="prerender"><h1>${esc(page.heading)}</h1><p>${esc(page.description)}</p>${dataBody(page)}${guideHtml}` +
     `<nav aria-label="${esc(SITE_NAME)}"><ul>${links}</ul></nav></div>`
   );
 }
 
-function render(page: PageSeo): string {
+function render(page: PageSeo, body?: string): string {
   const url = canonicalUrl(page);
   let html = template;
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${esc(page.title)}</title>`);
@@ -119,7 +173,7 @@ function render(page: PageSeo): string {
   html = setTag(html, 'name', 'twitter:title', page.title);
   html = setTag(html, 'name', 'twitter:description', page.description);
   html = html.replace('</head>', `    <script type="application/ld+json">${jsonLd(page)}</script>\n  </head>`);
-  html = html.replace('<div id="root"></div>', `<div id="root">${staticBody(page)}</div>`);
+  html = html.replace('<div id="root"></div>', `<div id="root">${body ?? staticBody(page)}</div>`);
   return html;
 }
 
@@ -133,20 +187,19 @@ for (const page of PAGES) {
 // status 404 instead of serving index.html as 200 (a "soft 404" to search engines).
 {
   const home = PAGES[0];
-  let html = render(home);
+  const nav = PAGES.map(p => `<li><a href="${p.path}">${esc(p.heading)}</a></li>`).join('');
+  let html = render(home, `<div class="prerender"><h1>找不到頁面</h1><p>這個網址不存在，請從下方選擇工具。</p><nav aria-label="${esc(SITE_NAME)}"><ul>${nav}</ul></nav></div>`);
   html = html.replace(/<title>[^<]*<\/title>/, `<title>找不到頁面｜${esc(SITE_NAME)}</title>`);
   html = html.replace(/\s*<link rel="canonical" href="[^"]*" \/>/, '');
   html = html.replace(/\s*<script type="application\/ld\+json">[\s\S]*?<\/script>/, '');
   html = html.replace('</head>', '    <meta name="robots" content="noindex" />\n  </head>');
-  html = html.replace(/<div class="prerender"><h1>[^<]*<\/h1><p>[^<]*<\/p>/, '<div class="prerender"><h1>找不到頁面</h1><p>這個網址不存在，請從下方選擇工具。</p>');
   writeFileSync(join(DIST, '404.html'), html);
 }
 
-const today = new Date().toISOString().slice(0, 10);
 const sitemap =
   '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
   PAGES.map(p =>
-    `  <url>\n    <loc>${canonicalUrl(p)}</loc>\n    <lastmod>${today}</lastmod>\n` +
+    `  <url>\n    <loc>${canonicalUrl(p)}</loc>\n    <lastmod>${p.updated}</lastmod>\n` +
     `    <changefreq>${p.changefreq}</changefreq>\n    <priority>${p.priority.toFixed(1)}</priority>\n  </url>`,
   ).join('\n') +
   '\n</urlset>\n';
