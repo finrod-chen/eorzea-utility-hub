@@ -452,7 +452,7 @@
       "version": "This backup was made by a newer version of the site"
     }
   },
-  "toolGuide": { "howTo": "How to use", "faq": "FAQ" },
+  "toolGuide": { "howTo": "How to use", "faq": "FAQ", "related": "Related tools" },
   "consent": {
     "title": "Cookies & ads",
     "body": "This site shows Google AdSense ads to cover running costs, and Google may use cookies to personalise them. Your tool data stays in your own browser.",

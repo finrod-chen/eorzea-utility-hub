@@ -426,7 +426,7 @@ export default function App() {
             >
               <Suspense fallback={<div className="py-24 text-center text-[var(--color-text-muted)] text-sm">{t('common.loading', { defaultValue: 'Loading…' })}</div>}>
                 {renderView()}
-                {currentView !== 'home' && <ToolGuide view={currentView} />}
+                {currentView !== 'home' && <ToolGuide view={currentView} onNavigate={navigate} />}
               </Suspense>
             </motion.div>
           </AnimatePresence>

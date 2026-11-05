@@ -452,7 +452,7 @@
       "version": "備份檔版本較新，請先更新網站後再匯入"
     }
   },
-  "toolGuide": { "howTo": "使用說明", "faq": "常見問題" },
+  "toolGuide": { "howTo": "使用說明", "faq": "常見問題", "related": "相關工具" },
   "consent": {
     "title": "Cookie 與廣告",
     "body": "本站使用 Google AdSense 顯示廣告來支持網站維運，Google 可能會使用 Cookie 提供個人化廣告。你的工具資料只會存在自己的瀏覽器裡。",
