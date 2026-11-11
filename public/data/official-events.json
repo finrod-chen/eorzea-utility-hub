@@ -1,5 +1,12 @@
 {
-  "generatedAt": "2026-11-06T15:01:46.584Z",
+  "generatedAt": "2026-11-11T15:10:19.280Z",
   "source": "https://www.ffxiv.com.tw/web/news/news_list.aspx?category=1",
-  "events": []
+  "events": [
+    {
+      "eventid": "event-4gqtef",
+      "title": "11/12 焰影燼途",
+      "url": "https://www.ffxiv.com.tw/web/news/news_content.aspx?id=45jX0JwOKm",
+      "date": "2026-11-12T14:00:00+08:00"
+    }
+  ]
 }
