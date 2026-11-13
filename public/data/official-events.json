@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-11T15:10:19.280Z",
+  "generatedAt": "2026-11-13T15:23:17.120Z",
   "source": "https://www.ffxiv.com.tw/web/news/news_list.aspx?category=1",
   "events": [
     {
@@ -7,6 +7,12 @@
       "title": "11/12 焰影燼途",
       "url": "https://www.ffxiv.com.tw/web/news/news_content.aspx?id=45jX0JwOKm",
       "date": "2026-11-12T14:00:00+08:00"
+    },
+    {
+      "eventid": "event-mydacg",
+      "title": "11/13 第X回 營運團隊報告",
+      "url": "https://www.ffxiv.com.tw/web/news/news_content.aspx?id=mP1Z95yEwa",
+      "date": "2026-11-13T14:00:00+08:00"
     }
   ]
 }
